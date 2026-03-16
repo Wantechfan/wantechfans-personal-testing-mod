@@ -5,3 +5,6 @@ description: "Congrats if you somehow found this"
 minGameVersion: "155.2"
 hidden: true
 subtitle: "No way you found this"
+ignore: [
+cool-musics
+]
