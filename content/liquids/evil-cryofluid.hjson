@@ -1,6 +1,6 @@
 type: CellLiquid
-name: Anti Cryofluid
-description: Testing
+name: Evil Cryofluid
+description: Drinks cryofluid
 temperature: 0.6
 coolant: false
 color: 8271c9
