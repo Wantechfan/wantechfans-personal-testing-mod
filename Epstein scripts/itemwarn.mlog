@@ -1,0 +1,84 @@
+set minnum 1000
+set x "x"
+sensor pl vault1 @plastanium
+sensor cu vault1 @copper
+jump 10 greaterThan cu minnum
+jump -1 equal cu 0
+print ":copper: [orange]Low copper![]\n"
+jump 11 always x false
+print ":copper: [red]No copper![]\n"
+jump 11 always x false
+print ":copper: [green]Copper good![]\n"
+sensor pb vault1 @lead
+jump 18 greaterThan pb minnum
+jump 16 equal pb 0
+print ":lead: [orange]Low lead![]\n"
+jump 19 always x false
+print ":lead: [red]No lead![]\n"
+jump 19 always x false
+print ":lead: [green]Lead good![]\n"
+sensor mt vault1 @metaglass
+jump 26 greaterThan mt minnum
+jump 24 equal mt 0
+print ":metaglass: [orange]Low metaglass![]\n"
+jump 27 always x false
+print ":metaglass: [red]No metaglass![]\n"
+jump 27 always x false
+print ":metaglass: [green]Metaglass good![]\n"
+sensor c vault1 @graphite
+jump 34 greaterThan c minnum
+jump 32 equal c 0
+print ":graphite: [orange]Low graphite![]\n"
+jump 35 always x false
+print ":graphite: [red]No graphite![]\n"
+jump 35 always x false
+print ":graphite: [green]Graphite good![]\n"
+sensor ti vault1 @titanium
+jump 42 greaterThan ti minnum
+jump 40 equal ti 0
+print ":titanium: [orange]Low titanium![]\n"
+jump 43 always x false
+print ":titanium: [red]No titanium![]\n"
+jump 43 always x false
+print ":titanium: [green]Titanium good![]\n"
+sensor th vault1 @thorium
+jump 50 greaterThan th minnum
+jump 48 equal th 0
+print ":thorium: [orange]Low thorium![]\n"
+jump 51 always x false
+print ":thorium: [red]No thorium![]\n"
+jump 51 always x false
+print ":thorium: [green]Thorium good![]\n"
+sensor si vault1 @silicon
+jump 58 greaterThan si minnum
+jump 56 equal si 0
+print ":silicon: [orange]Low silicon![]\n"
+jump 59 always x false
+print ":silicon: [red]Siligone![]\n"
+jump 59 always x false
+print ":silicon: [green]Silicon good![]\n"
+sensor pl vault1 @plastanium
+jump 66 greaterThan pl minnum
+jump 64 equal pl 0
+print ":plastanium: [orange]Low plastanium![]\n"
+jump 67 always x false
+print ":plastanium: [red]No plastanium![]\n"
+jump 67 always x false
+print ":plastanium: [green]Plastanium good![]\n"
+sensor ph vault1 @phase-fabric
+jump 74 greaterThan ph minnum
+jump 72 equal ph 0
+print ":phase-fabric: [orange]Low phase fabric![]\n"
+jump 75 always x false
+print ":phase-fabric: [red]No phase fabric![]\n"
+jump 75 always x false
+print ":phase-fabric: [green]Phase fabric good![]\n"
+sensor sa vault1 @surge-alloy
+jump 82 greaterThan sa minnum
+jump 80 equal sa 0
+print ":surge-alloy: [orange]Low surge alloy![]\n"
+jump 83 always x false
+print ":surge-alloy: [red]No surge alloy![]\n"
+jump 83 always x false
+print ":surge-alloy: [green]Surge alloy good![]"
+printflush message1
