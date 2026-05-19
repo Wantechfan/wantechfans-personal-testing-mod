@@ -1,0 +1,3 @@
+sensor item duct1 @totalItems
+op equal state item 0
+control enabled duct2 state 0 0 0
