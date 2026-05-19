@@ -2,7 +2,7 @@ set minnum 1000
 set x "x"
 sensor cu vault1 @copper
 jump 9 greaterThan cu minnum
-jump -1 equal cu 0
+jump 7 equal cu 0
 print ":copper: [orange]Low copper![]\n"
 jump 10 always x false
 print ":copper: [red]No copper![]\n"
