@@ -1,6 +1,5 @@
 set minnum 1000
 set x "x"
-sensor pl vault1 @plastanium
 sensor cu vault1 @copper
 jump 10 greaterThan cu minnum
 jump -1 equal cu 0
