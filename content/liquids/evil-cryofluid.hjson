@@ -6,7 +6,7 @@ coolant: false
 color: 8271c9
 colorFrom: 8271c9
 colorTo: 544d6b
-canStayOn: [asthosus-02b-01-pressure]
+canStayOn: [water]
 explosiveness: 0
 flammability: 0.1
 incinerable: false
