@@ -1,5 +1,5 @@
-const music = loadMusic("aufdieheide");
+const music = loadMusic("aufdieheide"); 
 
-    Events.on(ClientLoadEvent, e => {
-        Vars.control.sound.ambientMusic.add(music);
-    });
+Events.on(ClientLoadEvent, e => { 
+    Vars.control.sound.darkMusic.add(music); 
+});
