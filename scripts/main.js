@@ -30,6 +30,6 @@ Events.on(ClientLoadEvent, e => {
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.maxRange = 12;
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.lifetime = 120 * 7.4;
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.targetAir = true;
-    unit.weapons.get(0).bullet.fragBullet.weapons.spawnUnit.weapons.get(0).bullet.collidesAir = true;
-    unit.weapons.get(0).bullet.fragBullet.weapons.spawnUnit.weapons.get(0).bullet.buildingDamageMultiplier = 1;
+    unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.collidesAir = true;
+    unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.buildingDamageMultiplier = 1;
 });
