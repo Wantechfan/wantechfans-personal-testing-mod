@@ -39,5 +39,5 @@ Events.on(ClientLoadEvent, e => {
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.collidesAir = true;
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.buildingDamageMultiplier = 1;
 
-    console.log("Блять!");
+    Log.info("Блять!");
 });
