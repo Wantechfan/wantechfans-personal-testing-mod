@@ -5,7 +5,7 @@ Events.on(ClientLoadEvent, e => {
     Vars.control.sound.ambientMusic.add(musik); 
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3;
 
-    unit.fogRadiusMultiplier = 0.1;
+    unit.fogRadiusMultiplier = 1;
     unit.shootSound = Sounds.wind3;
     unit.targetAir = true;
     unit.range = 2700;
