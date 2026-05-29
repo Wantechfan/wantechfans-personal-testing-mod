@@ -40,4 +40,17 @@ Events.on(ClientLoadEvent, e => {
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.buildingDamageMultiplier = 1;
 
     Log.info("Блять!");
+
+    UnitTypes.emanate.weapons.add(new Weapon("large-weapon") {{
+        reload = 20;
+        x = 4;
+        y = 0;
+        shootSound = Sounds.wind3
+        bullet = new BasicBulletType(4, 50) {{
+            lifetime = 60;
+            width = 10
+            height = 12;
+            damage = 100000;
+        }};
+    }});
 });
