@@ -45,11 +45,12 @@ Events.on(ClientLoadEvent, e => {
         reload = 20;
         x = 4;
         y = 0;
-        shootSound = Sounds.wind3
+        shootSound = Sounds.wind3;
         bullet = new BasicBulletType(4, 50) {{
             lifetime = 60;
             width = 10
             height = 12;
+            speed = 4;
             damage = 100000;
         }};
     }});
