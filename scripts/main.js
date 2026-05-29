@@ -40,4 +40,6 @@ Events.on(ClientLoadEvent, e => {
     unit.weapons.get(0).bullet.fragBullet.spawnUnit.weapons.get(0).bullet.buildingDamageMultiplier = 1;
 
     Log.info("Блять!");
+
+    UnitTypes.emanate.weapons.get(0).damage = 10000;
 });
