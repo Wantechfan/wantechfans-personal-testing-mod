@@ -54,4 +54,9 @@ Events.on(ClientLoadEvent, e => {
             damage = 100000;
         }};
     }});
+    if Vars.content.block("asthosus-03c-01-catapult") {
+        log.info("Asthosus content found!");
+    } else {
+        log.info("Nu Asthosus?")
+    }
 });
