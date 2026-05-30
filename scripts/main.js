@@ -41,19 +41,6 @@ Events.on(ClientLoadEvent, e => {
 
     Log.info("Блять!");
 
-    UnitTypes.emanate.weapons.add(new Weapon("large-weapon") {{
-        reload = 20;
-        x = 4;
-        y = 0;
-        shootSound = Sounds.wind3;
-        bullet = new BasicBulletType(4, 50) {{
-            lifetime = 60;
-            width = 10
-            height = 12;
-            speed = 4;
-            damage = 100000;
-        }};
-    }});
     if Vars.content.block("asthosus-03c-01-catapult") {
         Log.info("Asthosus content found!");
     } else {
