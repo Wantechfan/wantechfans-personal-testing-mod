@@ -1,8 +1,13 @@
-const musik = Vars.tree.loadMusic("aufdieheide"); 
+const darkMusic = Vars.tree.loadMusic("moonlightsonata3rd");
+const ambientMusic = Vars.tree.loadMusic("dreitonpiano");
+const bossMusic = Vars.tree.loadMusic("racethesun");
+const soundManager = Vars.control.sound;
 let unit = Blocks.scathe;
 
 Events.on(ClientLoadEvent, e => { 
-    Vars.control.sound.ambientMusic.add(musik); 
+    soundManager.darkMusic.add(darkMusic);
+    soundManager.ambientMusic.add(ambientMusic);
+    soundManager.bossMusic.add(bossMusic);
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3;
 
     unit.fogRadiusMultiplier = 1;
