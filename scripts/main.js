@@ -55,8 +55,8 @@ Events.on(ClientLoadEvent, e => {
         }};
     }});
     if Vars.content.block("asthosus-03c-01-catapult") {
-        log.info("Asthosus content found!");
+        Log.info("Asthosus content found!");
     } else {
-        log.info("Nu Asthosus?")
+        Log.info("Nu Asthosus?")
     }
 });
