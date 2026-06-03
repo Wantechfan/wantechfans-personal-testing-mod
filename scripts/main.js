@@ -51,4 +51,7 @@ Events.on(ClientLoadEvent, e => {
     } else {
         Log.info("Nu Asthosus?");
     }
+    unit = UnitTypes.crawler.weapons.get(0).bullet;
+    unit.splashDamageRadius = 1000;
+    unit.buildingDamageMultiplier = 1;
 });
