@@ -50,8 +50,9 @@ Events.on(ClientLoadEvent, e => {
         Log.info("Asthosus content found!");
     } else {
         Log.info("Nu Asthosus?");
-    }
+    };
     unit = UnitTypes.crawler.weapons.get(0).bullet;
     unit.splashDamageRadius = 1000;
     unit.buildingDamageMultiplier = 1;
+    unit.splashDamage = 10000;
 });
