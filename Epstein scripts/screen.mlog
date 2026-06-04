@@ -1,0 +1,46 @@
+read divideBy cell1 1
+jump 3 lessThanEq number 176
+set number 0
+op add number1 number 1
+op add number2 number1 1
+sensor powerin node1 @powerNetIn
+jump 13 greaterThan powerin 10
+draw clear 0 0 0 0 0 0
+drawflush display1
+set number 0
+set number1 0
+set number2 0
+end
+sensor powerout node1 @powerNetOut
+op div powerin1 powerin divideBy
+op div powerout1 powerout divideBy
+op add powerin2 powerin1 88
+op add powerout2 powerout1 88
+op sub totalpower powerin powerout
+op div totalpower1 totalpower divideBy
+op add totalpower2 totalpower1 88
+wait 0.1
+sensor powerin3 node1 @powerNetIn
+sensor powerout3 node1 @powerNetOut
+op div powerin4 powerin3 divideBy
+op div powerout4 powerout3 divideBy
+op add powerin5 powerin4 88
+op add powerout5 powerout4 88
+op sub totalpower3 powerin3 powerout3
+op div totalpower4 totalpower3 divideBy
+op add totalpower5 totalpower4 88
+draw stroke 1 255 255 255 0 0
+draw color 0 0 0 255 0 0
+draw line number1 0 number1 176 0 0
+draw color 255 255 255 255 0 0
+draw line number2 0 number2 176 0 0
+draw color 255 255 0 255 0 0
+draw line number totalpower2 number1 totalpower5 0 0
+draw color 0 255 0 255 0 0
+draw line number powerin2 number1 powerin5 0 0
+draw color 255 0 0 255 0 0
+draw line number powerout2 number1 powerout5 0 0
+draw color 255 255 255 255 0 0
+draw line 0 88 176 88 0 0
+op add number number 1
+drawflush display1
