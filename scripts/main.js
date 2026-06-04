@@ -10,8 +10,7 @@ Events.on(ClientLoadEvent, e => {
     soundManager.bossMusic.add(bossMusic)
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3
     Blocks.surgeTower.maxNodes = 5
-    Blocks.blastDrill.conductivePower = true
-    Blocks.laserDrill.conductivePower = true
+    Vars.content.blocks().each(b => b.conductivePower = true)
 
     unit.fogRadiusMultiplier = 1
     unit.shootSound = Sounds.wind3
