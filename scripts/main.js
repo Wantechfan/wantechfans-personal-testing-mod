@@ -9,6 +9,7 @@ Events.on(ClientLoadEvent, e => {
     soundManager.ambientMusic.add(ambientMusic);
     soundManager.bossMusic.add(bossMusic);
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3;
+    Blocks.surgeTower.maxNodes = 5
 
     unit.fogRadiusMultiplier = 1;
     unit.shootSound = Sounds.wind3;
