@@ -53,7 +53,8 @@ Events.on(ClientLoadEvent, e => {
         let asthoturret = Vars.content.block("asthosus-03c-18-verite");
         asthoturret.range = 1000;
         asthoturret.reload = 1;
-        asthoturret = Vars.content.block("03c-20-draysten-mortar");
+        asthoturret = Vars.content.block("asthosus-03c-20-draysten-mortar");
+        asthoturret.minRange = 1000;
         asthoturret.range = 1000;
         asthoturret.reload = 1;
     } else {
