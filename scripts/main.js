@@ -49,7 +49,13 @@ Events.on(ClientLoadEvent, e => {
     Log.info("Блять!")
 
     if (Vars.content.block("asthosus-03c-01-catapult")) {
-        Log.info("Asthosus content found!")
+        Log.info("Asthosus content found! Modifying it......")
+        let asthoturret = Vars.content.block("asthosus-03c-18-verite")
+        asthoturret.range = 1000
+        asthoturret.reload = 1
+        asthoturret = Vars.content.block("03c-20-draysten-mortar")
+        asthoturret.range = 1000
+        asthoturret.reload = 1
     } else {
         Log.info("Nu Asthosus?")
     }
