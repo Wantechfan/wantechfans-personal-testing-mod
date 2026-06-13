@@ -10,7 +10,7 @@ Events.on(ClientLoadEvent, e => {
     soundManager.bossMusic.add(bossMusic);
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3;
     Blocks.surgeTower.maxNodes = 5;
-    Vars.content.blocks().each(b => b.conductivePower = true);
+    //Vars.content.blocks().each(b => b.conductivePower = true);
 
     unit.fogRadiusMultiplier = 1;
     unit.shootSound = Sounds.wind3;
@@ -50,19 +50,19 @@ Events.on(ClientLoadEvent, e => {
 
     if (Vars.content.block("asthosus-03c-18-verite")) {
         Log.info("Asthosus content found! Modifying it......");
-        let asthoturret = Vars.content.block("asthosus-03c-18-verite");
+        /*let asthoturret = Vars.content.block("asthosus-03c-18-verite");
         asthoturret.range = 1000;
         asthoturret.reload = 1;
         asthoturret = Vars.content.block("asthosus-03c-20-draysten-mortar");
         asthoturret.minRange = 1000;
         asthoturret.range = 1000;
-        asthoturret.reload = 1;
+        asthoturret.reload = 1;*/
     } else {
         Log.info("Nu Asthosus?");
     };
-    unit = UnitTypes.crawler.weapons.get(0).bullet;
+    /*unit = UnitTypes.crawler.weapons.get(0).bullet;
     unit.splashDamageRadius = 10000;
     unit.buildingDamageMultiplier = 1;
     unit.splashDamage = 10000;
-    unit.rangeOverride = 10000;
+    unit.rangeOverride = 10000;*/
 });
