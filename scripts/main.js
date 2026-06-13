@@ -1,5 +1,5 @@
-const darkMusic = Vars.tree.loadMusic("moonlightsonata3rd");
-const ambientMusic = Vars.tree.loadMusic("dreitonpiano");
+const darkMusic = Vars.tree.loadMusic("moonlightSonata3, moonlightSonata2");
+const ambientMusic = Vars.tree.loadMusic("dreitonpiano, moonlightSonata2");
 const bossMusic = Vars.tree.loadMusic("racethesun");
 const soundManager = Vars.control.sound;
 let unit = Blocks.scathe;
