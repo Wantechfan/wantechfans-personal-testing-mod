@@ -1,12 +1,14 @@
-const darkMusic = Vars.tree.loadMusic("moonlightSonata3, moonlightSonata2");
-const ambientMusic = Vars.tree.loadMusic("dreitonpiano, moonlightSonata2");
+const son3 = Vars.tree.loadMusic("moonlightSonata3");
+const son2 = Vars.tree.loadMusic("moonlightSonata2");
+const dp = Vars.tree.loadMusic("dreitonpiano")
+const son1 = Vars.tree.loadMusic("moonlightSonata1");
 const bossMusic = Vars.tree.loadMusic("racethesun");
 const soundManager = Vars.control.sound;
 let unit = Blocks.scathe;
 
 Events.on(ClientLoadEvent, e => { 
-    soundManager.darkMusic.add(darkMusic);
-    soundManager.ambientMusic.add(ambientMusic);
+    soundManager.darkMusic.add(son3, son1);
+    soundManager.ambientMusic.add(dp, son2);
     soundManager.bossMusic.add(bossMusic);
     UnitTypes.omura.weapons.get(0).shootSound = Sounds.wind3;
     Blocks.surgeTower.maxNodes = 5;
