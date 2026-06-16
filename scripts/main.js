@@ -116,7 +116,7 @@ Events.on(ClientLoadEvent, e => {
     soundManager.bossMusic.add(bossMusic);
     
     // Configure Omura unit
-    if (UnitTypes.omura.weapons && UnitTypes.omura.weapons.length > 0) {
+    /*if (UnitTypes.omura.weapons && UnitTypes.omura.weapons.length > 0) {
         UnitTypes.omura.weapons.get(0).shootSound = OMURA_SHOOT_SOUND;
     }
     
@@ -168,7 +168,7 @@ Events.on(ClientLoadEvent, e => {
         asthoDraysten.reload = 1;
     } else {
         Log.info("Asthosus mod not found. Skipping Asthosus modifications.");
-    }
+    }*/ //Disabled for a while.
     
     // ============================================
     // Crawler Unit Configuration (Optional)
