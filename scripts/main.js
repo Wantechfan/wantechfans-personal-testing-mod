@@ -19,7 +19,7 @@ Events.on(ClientLoadEvent, e => {
     const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
 
     // Settings Configuration
-    Vars.ui.settings.addCategory("Сука Блять", new TextureRegionDrawable(Icon.settings), table => {
+    Vars.ui.settings.addCategory("@category.mod.name", Icon.settings, table => {
         table.check("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
             Core.settings.put("epicMusics", value);
         })).row();
