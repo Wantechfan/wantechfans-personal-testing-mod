@@ -20,18 +20,18 @@ Events.on(ClientLoadEvent, e => {
 
     // Settings Configuration
     Vars.ui.settings.addCategory("@category.mod.name", Icon.settings, table => {
-        table.check("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
+        table.checkPref("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
             Core.settings.put("epicMusics", value);
         })).row();
         
-        table.cont.check("Scathe Cheat", Core.settings.getBool("scatheCheat", false), cons(value => {
+        table.checkPref("Scathe Cheat", Core.settings.getBool("scatheCheat", false), cons(value => {
             Core.settings.put("scatheCheat", value);
         })).row();
         
-        table.cont.check("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
+        table.checkPref("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
             Core.settings.put("asthosusStuff", value);
         })).row();
-    })
+    });
 
 
     // Music Setup (Fixed .addAll)
