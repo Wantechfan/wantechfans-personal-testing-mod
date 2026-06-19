@@ -32,6 +32,7 @@ const FRAG_BULLET_LIFETIME = 46;
 // Helper Functions
 // ============================================
 
+let scatheCheat = false;
 /**
  * Configure weapon bullet properties for a unit
  * @param {Object} unit - The unit to configure
@@ -114,40 +115,40 @@ Events.on(ClientLoadEvent, e => {
     soundManager.darkMusic.add(darkMusic1, darkMusic2);
     soundManager.ambientMusic.add(ambientMusic1, ambientMusic2);
     soundManager.bossMusic.add(bossMusic);
-    
-    // Configure Omura unit
-    /*if (UnitTypes.omura.weapons && UnitTypes.omura.weapons.length > 0) {
-        UnitTypes.omura.weapons.get(0).shootSound = OMURA_SHOOT_SOUND;
-    }
+
+    Vars.ui.settings.game.addSettingsTable("Tetapi Hari Ini Di Jogja Saya Sampaikan Saya Akan Lawan!", extend(SettingsTable, {
+        build(table) {
+            table.check("Scathe Cheat", Core.settings.getBool("scatheCheat", b);
+        }).row();
     
     // Configure Surge Tower
     Blocks.surgeTower.maxNodes = SURGE_TOWER_MAX_NODES;
+    if scatheCheat == true {
+        // ============================================
+        // Configure Scathe Block
+        // ============================================
+        let scatheUnit = Blocks.scathe;
+        scatheUnit.fogRadiusMultiplier = SCATHE_FOG_MULTIPLIER;
+        scatheUnit.shootSound = SCATHE_SHOOT_SOUND;
+        scatheUnit.targetAir = true;
+        scatheUnit.range = SCATHE_RANGE;
     
-    // ============================================
-    // Configure Scathe Block
-    // ============================================
-    let scatheUnit = Blocks.scathe;
-    scatheUnit.fogRadiusMultiplier = SCATHE_FOG_MULTIPLIER;
-    scatheUnit.shootSound = SCATHE_SHOOT_SOUND;
-    scatheUnit.targetAir = true;
-    scatheUnit.range = SCATHE_RANGE;
+        // ============================================
+        // Configure Scathe Ammo Types
+        // ============================================
     
-    // ============================================
-    // Configure Scathe Ammo Types
-    // ============================================
+        // Carbide ammo
+        let carbideUnit = Blocks.scathe.ammoTypes.get(Items.carbide).spawnUnit;
+        configureStandardAmmoUnit(carbideUnit, CARBIDE_LIFETIME);
     
-    // Carbide ammo
-    let carbideUnit = Blocks.scathe.ammoTypes.get(Items.carbide).spawnUnit;
-    configureStandardAmmoUnit(carbideUnit, CARBIDE_LIFETIME);
+        // Phase Fabric ammo
+        let phaseFabricUnit = Blocks.scathe.ammoTypes.get(Items.phaseFabric).spawnUnit;
+        configureStandardAmmoUnit(phaseFabricUnit, PHASE_FABRIC_LIFETIME);
     
-    // Phase Fabric ammo
-    let phaseFabricUnit = Blocks.scathe.ammoTypes.get(Items.phaseFabric).spawnUnit;
-    configureStandardAmmoUnit(phaseFabricUnit, PHASE_FABRIC_LIFETIME);
-    
-    // Surge Alloy ammo (with fragment spawning)
-    let surgeAlloyUnit = Blocks.scathe.ammoTypes.get(Items.surgeAlloy).spawnUnit;
-    configureSurgeAlloyUnit(surgeAlloyUnit);
-    
+        // Surge Alloy ammo (with fragment spawning)
+        let surgeAlloyUnit = Blocks.scathe.ammoTypes.get(Items.surgeAlloy).spawnUnit;
+        configureSurgeAlloyUnit(surgeAlloyUnit);
+    }
     // ============================================
     // Asthosus Mod Support (Optional)
     // ============================================
