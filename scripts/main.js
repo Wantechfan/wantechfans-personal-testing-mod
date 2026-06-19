@@ -19,7 +19,7 @@ Events.on(ClientLoadEvent, e => {
     const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
 
     // Settings Configuration
-    Vars.ui.settings.addCategory("@category.mod.name", Icon.settings, table => {
+    Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
         /*table.Button("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
             Core.settings.put("epicMusics", value);
         })).row();
