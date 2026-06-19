@@ -28,9 +28,9 @@ Events.on(ClientLoadEvent, e => {
         table.checkPref("epicMusics", false);
         table.checkPref("scatheCheat", false);
         table.checkPref("asthosusStuff", false);
-        table.episMusics.name = "Epic Musics";
-        table.scatheCheat.name = "Scathe Cheat";
-        table.asthosusStuff.name = "Asthosus Stuff";
+        table.get("epicMusics").name = "Epic Musics";
+        table.get("scatheCheat").name = "Scathe Cheat";
+        table.get("asthosusStuff").name = "Asthosus Stuff";
     });
 
 
