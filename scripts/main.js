@@ -15,18 +15,19 @@ Events.on(ClientLoadEvent, e => {
     const scatheCarbide = Blocks.scathe.ammoTypes.get(Items.carbide).spawnUnit;
     const scathePhase = Blocks.scathe.ammoTypes.get(Items.phaseFabric).spawnUnit;
     const scatheSurge = Blocks.scathe.ammoTypes.get(Items.surgeAlloy).spawnUnit;
-    const verite = Vars.content.block("asthosus-03c-18-verite");
-    const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
+    if Vars.mods.getMod("asthosus") {
+        const verite = Vars.content.block("asthosus-03c-18-verite");
+        const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
+    } else {
+        Log.info("No Asthosus content found!");
+    }
 
     // Settings Configuration
     Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
+        //Needs fix and further detais that I don't fucking know.
         table.checkPref("epicMusics", false);
-        
         table.checkPref("scatheCheat", false);
-        })).row();
-        
         table.checkPref("asthosusStuff", false);
-        })).row();
     });
 
 
@@ -83,15 +84,17 @@ Events.on(ClientLoadEvent, e => {
     }
 
     // Asthosus Mod
-    if (Core.settings.getBool("asthosusStuff", false)) {
-        if (verite) {
-            verite.range = 1000;
-            verite.reload = 1;
-        }
-        if (mortar) {
-            mortar.minRange = 1000;
-            mortar.range = 1000;
-            mortar.reload = 1;
-        }
-    }
+    if Vars.mods.getMod("asthosus") {
+        if (Core.settings.getBool("asthosusStuff", false)) {
+            if (verite) {
+                verite.range = 1000;
+                verite.reload = 1;
+            };
+            if (mortar) {
+                mortar.minRange = 1000;
+                mortar.range = 1000;
+                mortar.reload = 1;
+            };
+        };
+    };
 });
