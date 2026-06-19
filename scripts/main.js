@@ -19,9 +19,6 @@ Events.on(ClientLoadEvent, e => {
     const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
 
     // Settings Configuration
-    // Note: Replaced 'mod.uiTable.build' with the proper way to add game settings
-    Vars.ui.settings.game.addButton("Сука Блять", () => {
-        // Settings Configuration
     Vars.ui.settings.game.row(); // Moves to a new row in the settings menu
     Vars.ui.settings.game.textButton("Сука Блять", () => {
         const dialog = new BaseDialog("Сука Блять");
