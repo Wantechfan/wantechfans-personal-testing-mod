@@ -15,7 +15,7 @@ Events.on(ClientLoadEvent, e => {
     const scatheCarbide = Blocks.scathe.ammoTypes.get(Items.carbide).spawnUnit;
     const scathePhase = Blocks.scathe.ammoTypes.get(Items.phaseFabric).spawnUnit;
     const scatheSurge = Blocks.scathe.ammoTypes.get(Items.surgeAlloy).spawnUnit;
-    if Vars.mods.getMod("asthosus") {
+    if (Vars.mods.getMod("asthosus")) {
         const verite = Vars.content.block("asthosus-03c-18-verite");
         const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
     } else {
@@ -84,17 +84,17 @@ Events.on(ClientLoadEvent, e => {
     }
 
     // Asthosus Mod
-    if Vars.mods.getMod("asthosus") {
+    if (Vars.mods.getMod("asthosus")) {
         if (Core.settings.getBool("asthosusStuff", false)) {
             if (verite) {
                 verite.range = 1000;
                 verite.reload = 1;
-            };
+            }
             if (mortar) {
                 mortar.minRange = 1000;
                 mortar.range = 1000;
                 mortar.reload = 1;
-            };
-        };
-    };
+            }
+        }
+    }
 });
