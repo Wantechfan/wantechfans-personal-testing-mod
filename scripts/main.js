@@ -21,6 +21,9 @@ Events.on(ClientLoadEvent, e => {
     // Settings Configuration
     // Note: Replaced 'mod.uiTable.build' with the proper way to add game settings
     Vars.ui.settings.game.addButton("Сука Блять", () => {
+        // Settings Configuration
+    Vars.ui.settings.game.row(); // Moves to a new row in the settings menu
+    Vars.ui.settings.game.textButton("Сука Блять", () => {
         const dialog = new BaseDialog("Сука Блять");
         dialog.addCloseButton();
         
@@ -39,7 +42,8 @@ Events.on(ClientLoadEvent, e => {
         })).row();
         
         dialog.show();
-    });
+    }).width(240).pad(4).row(); // Standard sizing and padding for Mindustry UI buttons
+
 
     // Music Setup (Fixed .addAll)
     if (Core.settings.getBool("epicMusics", false)) {
