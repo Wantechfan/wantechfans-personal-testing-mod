@@ -19,27 +19,19 @@ Events.on(ClientLoadEvent, e => {
     const mortar = Vars.content.block("asthosus-03c-20-draysten-mortar");
 
     // Settings Configuration
-    Vars.ui.settings.game.row(); // Moves to a new row in the settings menu
-    Vars.ui.settings.game.textButton("Сука Блять", () => {
-        const dialog = new BaseDialog("Сука Блять");
-        dialog.addCloseButton();
-        
-        dialog.cont.add("Insyaallah akan terbuka 19 juta lapangan pekerjaan.").row();
-        
-        dialog.cont.check("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
+    Vars.ui.settings.addCategory("Сука Блять", new TextureRegionDrawable(Icon.settings), table => {
+        table.check("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
             Core.settings.put("epicMusics", value);
         })).row();
         
-        dialog.cont.check("Scathe Cheat", Core.settings.getBool("scatheCheat", false), cons(value => {
+        table.cont.check("Scathe Cheat", Core.settings.getBool("scatheCheat", false), cons(value => {
             Core.settings.put("scatheCheat", value);
         })).row();
         
-        dialog.cont.check("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
+        table.cont.check("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
             Core.settings.put("asthosusStuff", value);
         })).row();
-        
-        dialog.show();
-    }).width(240).pad(4).row(); // Standard sizing and padding for Mindustry UI buttons
+    })
 
 
     // Music Setup (Fixed .addAll)
