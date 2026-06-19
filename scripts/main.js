@@ -20,7 +20,7 @@ Events.on(ClientLoadEvent, e => {
 
     // Settings Configuration
     Vars.ui.settings.addCategory("@category.mod.name", Icon.settings, table => {
-        table.Button("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
+        /*table.Button("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
             Core.settings.put("epicMusics", value);
         })).row();
         
@@ -30,7 +30,7 @@ Events.on(ClientLoadEvent, e => {
         
         table.Button("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
             Core.settings.put("asthosusStuff", value);
-        })).row();
+        })).row();*/
     });
 
 
