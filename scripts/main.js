@@ -20,17 +20,13 @@ Events.on(ClientLoadEvent, e => {
 
     // Settings Configuration
     Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
-        /*table.Button("Epic Musics", Core.settings.getBool("epicMusics", false), cons(value => {
-            Core.settings.put("epicMusics", value);
+        table.checkPref("epicMusics", false);
+        
+        table.checkPref("scatheCheat", false);
         })).row();
         
-        table.Button("Scathe Cheat", Core.settings.getBool("scatheCheat", false), cons(value => {
-            Core.settings.put("scatheCheat", value);
+        table.checkPref("asthosusStuff", false);
         })).row();
-        
-        table.Button("Asthosus Stuff", Core.settings.getBool("asthosusStuff", false), cons(value => {
-            Core.settings.put("asthosusStuff", value);
-        })).row();*/
     });
 
 
