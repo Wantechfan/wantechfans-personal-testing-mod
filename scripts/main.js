@@ -25,9 +25,9 @@ Events.on(ClientLoadEvent, e => {
     // Settings Configuration
     Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
         //Needs fix and further detais that I don't fucking know.
-        table.checkPref("epicMusics", false);
-        table.checkPref("scatheCheat", false);
-        table.checkPref("asthosusStuff", false);
+        table.checkPref("Sum gud Gyatthoven musik", "epicMusics", false);
+        table.checkPref("Scathe has seizures", "scatheCheat", false);
+        table.checkPref("Inhumane mortar and verite", "asthosusStuff", false);
     });
 
 
