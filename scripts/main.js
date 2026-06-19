@@ -23,12 +23,30 @@ Events.on(ClientLoadEvent, e => {
     }
 
     // Settings Configuration
-    Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
+    /*Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
         //Needs fix and further detais that I don't fucking know.
         table.checkPref("Sum gud Gyatthoven musik", "epicMusics", false);
         table.checkPref("Scathe has seizures", "scatheCheat", false);
         table.checkPref("Inhumane mortar and verite", "asthosusStuff", false);
-    });
+    });*/
+    // Settings Configuration
+    Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
+    
+    // Helper function to create checkboxes manually since checkPref is strict
+    function addCustomCheck(title, key, defaultValue) {
+        // Create the checkbox and initialize its state based on saved settings
+        table.check(title, Core.settings.getBool(key, defaultValue), t => {
+            Core.settings.put(key, t);
+        }).left().row(); // Align left and move to the next row
+    }
+
+    // Now you can name them whatever you want!
+    addCustomCheck("Epik Gyatthoven and Others Song", "epicMusics", false);
+    addCustomCheck("Scathe Have Seizures", "scatheCheat", false);
+    addCustomCheck("Verite and Mortar Have Serizures", "asthosusStuff", false);
+    
+});
+
 
 
     // Music Setup (Fixed .addAll)
