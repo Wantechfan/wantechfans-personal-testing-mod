@@ -1,7 +1,8 @@
 // Keep music loading here as it's usually safe, or move inside if needed
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3");
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1");
-const ambientMusic1 = Vars.tree.loadMusic("dreitonpiano");
+const darkMusic3 = Vars.tree.loadMusic("winterWind");
+const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano");
 const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2");
 const bossMusic = Vars.tree.loadMusic("racethesun");
 
@@ -37,7 +38,7 @@ Events.on(ClientLoadEvent, e => {
 
     // Music Setup (Fixed .addAll)
     if (Core.settings.getBool("epicMusics", false)) {
-        soundManager.darkMusic.addAll(darkMusic1, darkMusic2);
+        soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3);
         soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2);
         soundManager.bossMusic.add(bossMusic);
     }
