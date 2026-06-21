@@ -4,6 +4,7 @@ const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1");
 const darkMusic3 = Vars.tree.loadMusic("winterWind");
 const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano");
 const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2");
+const ambientMusic3 = Vars.tree.loadMusic("marimba");
 const bossMusic = Vars.tree.loadMusic("racethesun");
 
 // Execution
@@ -39,7 +40,7 @@ Events.on(ClientLoadEvent, e => {
     // Music Setup (Fixed .addAll)
     if (Core.settings.getBool("epicMusics", false)) {
         soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3);
-        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2);
+        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3);
         soundManager.bossMusic.add(bossMusic);
     }
 
