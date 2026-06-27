@@ -132,3 +132,79 @@ Simpan file tambahan tersebut di folder assets/sprites/ dengan nama:
 5. water-power-cable-t-glow.png
 6. water-power-cable-four-glow.png
 */
+
+const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
+    // Spesifikasi blok
+    size: 1,
+    health: 120,
+    maxNodes: 10,       // Jumlah maksimal link laser ke tiang biasa
+    laserRange: 6,       // Jarak jangkauan laser ke tiang biasa
+    
+    // KUNCI: Mengizinkan blok ini ditempel di pinggir pantai/daratan
+    // agar bisa menyentuh kabel air sekaligus tiang darat
+    floating: true,
+    placeableLiquid: true,
+
+    // KUNCI: Mengalirkan listrik langsung lewat kontak fisik/sentuhan blok
+    conductivePower: true,
+
+    load() {
+        this.super$load();
+        this.baseRegion = Core.atlas.find(this.name);
+        this.glowRegion = Core.atlas.find(this.name + "-glow");
+    },
+
+    // Efek visual menyala saat dialiri listrik
+    draw(tile) {
+        Draw.rect(this.baseRegion, tile.drawx(), tile.drawy());
+
+        let build = tile.build;
+        if (build != null && build.power != null) {
+            let graph = build.power.graph;
+            if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
+                Draw.color(Pal.powerLight);
+                Draw.blend(Blending.additive);
+                Draw.rect(this.glowRegion, tile.drawx(), tile.drawy());
+                Draw.blend();
+                Draw.color();
+            }
+        }
+    }
+});
+
+// LOGIKA KONEKSI LASER
+// Blok ini bebas terhubung ke tiang listrik mana pun, 
+// KECUALI ke kabel bawah air (karena kabel air hanya mau terhubung lewat sentuhan fisik)
+cableTransitionNode.entityType = () => extend(PowerNode.PowerNodeEntity, {
+    canConnectTo(other) {
+        // Cari nama internal dari kabel bawah air Anda (sesuai id di mod)
+        // Di sini kita asumsikan namanya "water-power-cable"
+        let waterCableBlock = Vars.content.getByName(ContentType.block, "your-mod-name-water-power-cable");
+        
+        // Tolak koneksi laser jika tujuannya adalah kabel air
+        if (other.block === waterCableBlock) {
+            return false;
+        }
+        
+        // Izinkan koneksi laser ke blok power lainnya (tiang listrik biasa, baterai, generator)
+        return true; 
+    }
+});
+
+// Konfigurasi penempatan di menu build
+cableTransitionNode.category = Category.power;
+cableTransitionNode.buildVisibility = BuildVisibility.shown;
+cableTransitionNode.requirements = ItemStack.with(
+    Items.copper, 15,
+    Items.lead, 10,
+    Items.silicon, 5
+);
+
+// Another Indonesian documentation
+/*
+# Aset Gambar yang Diperlukan (assets/sprites/)
+1. cable-transition-node.png:
+   Desain tiang atau jangkar transisi khusus (bisa dibuat seperti tiang darat namun memiliki aksen pelampung atau lapisan besi tebal).
+2. cable-transition-node-glow.png:
+   Bagian lampu indikator putih transparan yang akan menyala kuning saat jaringan aktif.
+*/
