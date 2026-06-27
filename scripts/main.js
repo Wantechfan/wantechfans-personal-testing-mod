@@ -21,20 +21,32 @@ Events.on(ClientLoadEvent, e => {
         Items.lead, 9
     );
 
-    // Fetch your custom blocks
     const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
     const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
     const root = Blocks.powerNode;
 
-    // Check if the vanilla powerNode and its techNode exist
     if (root && root.techNode != null) {
         
-        // 1. Create the transition node attached to the vanilla powerNode's techNode
+        // 1. Create the tech node for the transition node
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
-        root.techNode.children.add(customNodeA);
         
-        // FIX: The parent node for waterCable is customNodeA, NOT transition.techNode
+        // 2. Create the tech node for the water cable attached to customNodeA
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
+        
+        // --- THE FIX: Bind the nodes to the blocks & planet ---
+        // Ensure the blocks know they have a tech node
+        transition.techNode = customNodeA;
+        waterCable.techNode = customNodeB;
+
+        // Inherit the visibility rules (planet tabs) from the vanilla parent block
+        // This copies the Serpulo/Erekir alignment so the UI draws it
+        if(root.techNode.hasPlanets){
+            customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
+            customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
+        }
+
+        // 3. Physically insert them into the array tree structure
+        root.techNode.children.add(customNodeA);
         customNodeA.children.add(customNodeB);
 
         Log.info("Tech tree injection successful!");
