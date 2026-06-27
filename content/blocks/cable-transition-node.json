@@ -1,0 +1,10 @@
+{
+  "research": {
+    "parent": "power-node",
+    "requirements": [
+      "copper/45",
+      "lead/30",
+      "silicon/15"
+    ]
+  }
+}
