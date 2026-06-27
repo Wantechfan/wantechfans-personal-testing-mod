@@ -8,6 +8,7 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba");
 const bossMusic = Vars.tree.loadMusic("racethesun");
 
 // Execution
+require("blocks"); 
 Events.on(ClientLoadEvent, e => {
     Log.info("Блять!");
 
