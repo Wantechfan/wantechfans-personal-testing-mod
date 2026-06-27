@@ -11,8 +11,53 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // This value is preserved across multiple ClientLoadEvent executions
 require("blocks");
 Events.on(ClientLoadEvent, () => {
-    Log.info("Блять!"); 
+    // Look up the vanilla parent node you want to attach your custom branch to
+    const vanillaParent = TechTree.getallnodes().find(n => n.content === Blocks.powerNode);
 
+    if (vanillaParent != null) {
+        // --- STEP 1: FORCE-CLEAN ANY PREVIOUS EVENT RUN DUPLICATES ---
+        // Wipes out old layout nodes if you switch planet tabs back and forth
+        if (vanillaParent.children != null) {
+            vanillaParent.children.remove(t => t.content === cableTransitionNode);
+        }
+        TechTree.getallnodes().remove(t => t.content === cableTransitionNode || t.content === waterCable);
+
+        // --- STEP 2: REGISTER TRANSITION NODE ---
+        // Dynamically creates, setups, and appends the node directly to Blocks.powerNode
+        TechTree.register(Blocks.powerNode, cableTransitionNode, () => {
+            // Inherit the exact planetary settings (Serpulo tab visibility) from the parent
+            if (vanillaParent.shownPlanets != null) {
+                cableTransitionNode.techNode.shownPlanets.addAll(vanillaParent.shownPlanets);
+            }
+            
+            // Assign custom costs for the transition block
+            cableTransitionNode.techNode.requirements = ItemStack.with(
+                Items.copper, 45,
+                Items.lead, 30,
+                Items.silicon, 15
+            );
+
+            // --- STEP 3: REGISTER WATER CABLE AS A CHILD ---
+            // Directly embeds the child creation code inside the parent block context
+            TechTree.register(cableTransitionNode, waterCable, () => {
+                if (vanillaParent.shownPlanets != null) {
+                    waterCable.techNode.shownPlanets.addAll(vanillaParent.shownPlanets);
+                }
+
+                // Assign custom costs for the cable block
+                waterCable.techNode.requirements = ItemStack.with(
+                    Items.copper, 15,
+                    Items.lead, 9
+                );
+            });
+        });
+
+        Log.info("Tech tree securely generated via engine manifest registers!");
+    } else {
+        Log.err("Could not find vanilla powerNode in the global TechTree configuration map.");
+    }
+    
+    Log.info("Блять!");
     // Safely fetch content now that ClientLoadEvent has fired
     const soundManager = Vars.control.sound;
     const scathe = Blocks.scathe;
