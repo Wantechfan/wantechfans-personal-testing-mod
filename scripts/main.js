@@ -16,63 +16,72 @@ Events.on(ClientLoadEvent, () => {
 
     if (root && root.techNode != null && transition && waterCable) {
         
-        // 1. SAFETY CHECK: If transition already has a techNode, skip to avoid duplicates
-        if (transition.techNode != null || root.techNode.children.contains(t => t.content == transition)) {
-            Log.info("Tech tree nodes already injected. Skipping duplicate registration.");
-            return;
-        }
-
-        const researchCostTrans = ItemStack.with(
-            Items.copper, 45,
-            Items.lead, 30,
-            Items.silicon, 15
-        );
-        
-        const researchCostCab = ItemStack.with(
-            Items.copper, 15,
-            Items.lead, 9
-        );
-        
-        // 2. Create unique nodes
-        const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
-        const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
-        
-        // 3. Link blocks directly to their node trackers
-        transition.techNode = customNodeA;
-        waterCable.techNode = customNodeB;
-
-        if (transition.techNodes == null) transition.techNodes = new Seq();
-        if (waterCable.techNodes == null) waterCable.techNodes = new Seq();
-        
-        transition.techNodes.add(customNodeA);
-        waterCable.techNodes.add(customNodeB);
-
-        // 4. Inherit planet restrictions
-        if (root.techNode.shownPlanets != null) {
-            customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
-            customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
-        }
-
-        // 5. Safely attach to the hierarchy
+        // Ensure child tracking collections exist
         if (root.techNode.children == null) root.techNode.children = new Seq();
+
+        // 1. DYNAMIC CHECK: Look inside the parent node's active children list.
+        // If it already contains a node managing our transition block, look for it.
+        let customNodeA = root.techNode.children.find(t => t.content === transition);
+        
+        // If it doesn't exist on this layout generation cycle, create it!
+        if (customNodeA == null) {
+            const researchCostTrans = ItemStack.with(
+                Items.copper, 45,
+                Items.lead, 30,
+                Items.silicon, 15
+            );
+            
+            customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
+            root.techNode.children.add(customNodeA);
+            
+            // Sync block pointer and planet rendering rules
+            transition.techNode = customNodeA;
+            if (transition.techNodes == null) transition.techNodes = new Seq();
+            if (!transition.techNodes.contains(customNodeA)) transition.techNodes.add(customNodeA);
+            
+            if (root.techNode.shownPlanets != null) {
+                customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
+            }
+        }
+
+        // Ensure customNodeA's child sequence is ready
         if (customNodeA.children == null) customNodeA.children = new Seq();
 
-        root.techNode.children.add(customNodeA);
-        customNodeA.children.add(customNodeB);
+        // 2. CHILD CHECK: Look inside customNodeA to see if waterCable is attached.
+        let customNodeB = customNodeA.children.find(t => t.content === waterCable);
 
-        // 6. Inject into the master tracking array for the planet tree
+        if (customNodeB == null) {
+            const researchCostCab = ItemStack.with(
+                Items.copper, 15,
+                Items.lead, 9
+            );
+
+            customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
+            customNodeA.children.add(customNodeB);
+
+            // Sync block pointer and planet rendering rules
+            waterCable.techNode = customNodeB;
+            if (waterCable.techNodes == null) waterCable.techNodes = new Seq();
+            if (!waterCable.techNodes.contains(customNodeB)) waterCable.techNodes.add(customNodeB);
+
+            if (root.techNode.shownPlanets != null) {
+                customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
+            }
+        }
+
+        // 3. GLOBAL MATRIX UPDATE: Force injection into the master lookup tracking arrays
         const globalRoot = root.techNode.rootNode;
         if (globalRoot != null && globalRoot.all != null) {
             if (!globalRoot.all.contains(customNodeA)) globalRoot.all.add(customNodeA);
             if (!globalRoot.all.contains(customNodeB)) globalRoot.all.add(customNodeB);
         }
 
-        Log.info("Tech tree injection clean and verified!");
+        Log.info("Tech tree node verified or safely re-injected without duplicates.");
     } else {
         Log.err("Tech tree injection failed! Missing blocks or rootNode.");
     }
     
-    Log.info("Блять!");
+    Log.info("Блять!"); 
 
     // Safely fetch content now that ClientLoadEvent has fired
     const soundManager = Vars.control.sound;
