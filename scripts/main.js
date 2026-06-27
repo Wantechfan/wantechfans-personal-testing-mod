@@ -10,7 +10,39 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // Execution
 require("blocks"); 
 Events.on(ClientLoadEvent, e => {
-    Log.info("Блять!");
+    const researchCostTrans = ItemStack.with(
+        Items.copper, 45,
+        Items.lead, 30,
+        Items.silicon, 15
+    );
+    
+    const researchCostCab = ItemStack.with(
+        Items.copper, 15,
+        Items.lead, 9
+    );
+
+    // Fetch your custom blocks
+    const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
+    const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
+    const root = Blocks.powerNode;
+
+    // Check if the vanilla powerNode and its techNode exist
+    if (root && root.techNode != null) {
+        
+        // 1. Create the transition node attached to the vanilla powerNode's techNode
+        const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
+        root.techNode.children.add(customNodeA);
+        
+        // FIX: The parent node for waterCable is customNodeA, NOT transition.techNode
+        const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
+        customNodeA.children.add(customNodeB);
+
+        Log.info("Tech tree injection successful!");
+    } else {
+        Log.err("Failed to inject into tech tree: powerNode or its techNode is missing.");
+    }
+    
+    Log.info("Блять!"); 
 
     // Safely fetch content now that ClientLoadEvent has fired
     const soundManager = Vars.control.sound;
