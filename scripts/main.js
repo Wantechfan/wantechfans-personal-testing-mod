@@ -25,33 +25,41 @@ Events.on(ClientLoadEvent, e => {
     const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
     const root = Blocks.powerNode;
 
-    if (root && root.techNode != null) {
+    // Safety checks to ensure variables are fully mapped
+    if (root && root.techNode != null && transition && waterCable) {
         
-        // 1. Create the tech node for the transition node
+        // 1. Instantiate the new nodes in memory
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
-        
-        // 2. Create the tech node for the water cable attached to customNodeA
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
         
-        // --- THE FIX: Bind the nodes to the blocks & planet ---
-        // Ensure the blocks know they have a tech node
+        // 2. Link blocks to their respective nodes
         transition.techNode = customNodeA;
         waterCable.techNode = customNodeB;
 
-        // Inherit the visibility rules (planet tabs) from the vanilla parent block
-        // This copies the Serpulo/Erekir alignment so the UI draws it
-        if(root.techNode.hasPlanets){
+        // 3. Match planet visibility variables
+        if (root.techNode.shownPlanets) {
             customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
             customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
         }
 
-        // 3. Physically insert them into the array tree structure
+        // 4. Attach to parent collections
         root.techNode.children.add(customNodeA);
         customNodeA.children.add(customNodeB);
 
+        // 5. CRITICAL FIX: Force the engine to evaluate positioning, depth, and UI mapping
+        customNodeA.setup();
+        customNodeB.setup();
+
+        // 6. CRITICAL FIX: Push to the global node trackers so search and UI indices see them
+        if (root.techNode.rootNode) {
+            // This injects them into the global list of active nodes for the Serpulo planet tree
+            if (!root.techNode.rootNode.all.contains(customNodeA)) root.techNode.rootNode.all.add(customNodeA);
+            if (!root.techNode.rootNode.all.contains(customNodeB)) root.techNode.rootNode.all.add(customNodeB);
+        }
+
         Log.info("Tech tree injection successful!");
     } else {
-        Log.err("Failed to inject into tech tree: powerNode or its techNode is missing.");
+        Log.err("Tech tree injection failed! Check if block names or root are null.");
     }
     
     Log.info("Блять!"); 
