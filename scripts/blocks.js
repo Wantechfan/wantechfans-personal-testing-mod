@@ -11,7 +11,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     load() {
         this.super$load();
         
-        // 1. Muat Sprite Dasar (Normal)
+        // 1. Load Base Sprites (Normal)
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -19,8 +19,8 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
-        // 2. Muat Sprite Glow (Bagian yang akan menyala)
-        // Nama file harus diakhiri dengan "-glow" di folder sprites Anda
+        // 2. Load Glow Sprites (Parts that will illuminate)
+        // File names must end with "-glow" in your sprites folder
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -30,18 +30,18 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     },
 
     draw(tile) {
-        // Logika Bitmasking untuk mencari arah tetangga
+        // Bitmasking logic to check neighbor directions
         let mask = 0;
-        if (tile.nearby(0) != null && tile.nearby(0).block() === this) mask |= 1;  // Kanan
-        if (tile.nearby(1) != null && tile.nearby(1).block() === this) mask |= 2;  // Atas
-        if (tile.nearby(2) != null && tile.nearby(2).block() === this) mask |= 4;  // Kiri
-        if (tile.nearby(3) != null && tile.nearby(3).block() === this) mask |= 8;  // Bawah
+        if (tile.nearby(0) != null && tile.nearby(0).block() === this) mask |= 1;  // Right
+        if (tile.nearby(1) != null && tile.nearby(1).block() === this) mask |= 2;  // Up
+        if (tile.nearby(2) != null && tile.nearby(2).block() === this) mask |= 4;  // Left
+        if (tile.nearby(3) != null && tile.nearby(3).block() === this) mask |= 8;  // Down
 
         let region = this.singleRegion;
         let glowRegion = this.singleGlow;
         let rotation = 0;
 
-        // Menentukan kecocokan bentuk sprite dasar dan sprite glow
+        // Determine shape matching for base sprites and glow sprites
         switch (mask) {
             case 0: region = this.singleRegion; glowRegion = this.singleGlow; rotation = 0; break;
             
@@ -66,31 +66,31 @@ const waterCable = extend(PowerNode, "water-power-cable", {
             case 15: region = this.fourWayRegion; glowRegion = this.fourWayGlow; rotation = 0; break;
         }
 
-        // Gambar sprite dasar (selalu terlihat)
+        // Draw the base sprite (always visible)
         Draw.rect(region, tile.drawx(), tile.drawy(), rotation);
 
-        // KUNCI: Ambil data entitas bangunan untuk memeriksa status listrik
+        // KEY: Retrieve building entity data to check power status
         let build = tile.build;
         if (build != null && build.power != null) {
-            // Memeriksa jika ada produksi energi atau simpanan listrik di jaringannya
+            // Check if there is power production or stored electricity in its network
             let graph = build.power.graph;
             if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
                 
-                // Atur warna menyala (Default kuning/oranye khas listrik Mindustry)
-                // Anda bisa mengganti Pal.powerLight dengan Color.valueOf("HEX_WARNA") jika ingin warna lain
+                // Set glow color (Defaults to typical yellow/orange Mindustry power light)
+                // You can replace Pal.powerLight with Color.valueOf("HEX_COLOR") if you want a different color
                 Draw.color(Pal.powerLight); 
                 
-                // Gambar sprite glow di atas sprite dasar dengan mode pencahayaan game
-                Draw.blend(Blending.additive); // Membuat efek cahaya bertumpuk terang
+                // Draw the glow sprite on top of the base sprite using additive blending
+                Draw.blend(Blending.additive); // Creates a bright layered lighting effect
                 Draw.rect(glowRegion, tile.drawx(), tile.drawy(), rotation);
-                Draw.blend(); // Reset mode blend ke normal
-                Draw.color(); // Reset warna ke normal
+                Draw.blend(); // Reset blend mode to normal
+                Draw.color(); // Reset color to normal
             }
         }
     }
 });
 
-// Batasi koneksi laser agar hanya terhubung antar sesama kabel ini
+// Restrict laser connections so they only link between cables of this exact type
 waterCable.entityType = () => extend(PowerNode.PowerNodeEntity, {
     canConnectTo(other) { return other.block === waterCable; }
 });
@@ -100,31 +100,30 @@ waterCable.buildVisibility = BuildVisibility.shown;
 waterCable.requirements = ItemStack.with(Items.copper, 5, Items.lead, 3);
 
 
-// Documentation (in Indonesian)
-// I don't fucking care if you're not Indonesian, atleast I can understand it.
+// Documentation
 /*
-# Nama File Sprite yang Dibutuhkan (assets/sprites/)
+# Required Sprite File Names (assets/sprites/)
 
-Agar kode di atas berjalan tanpa eror, Anda wajib membuat 6 file gambar terpisah di dalam folder sprite mod Anda dengan nama berikut:
+For the code above to run without errors, you must create 6 separate image files in your mod's sprites folder with the following names:
 1. water-power-cable-single.png
-   Bentuk: Kotak/lingkaran polos di tengah. Digunakan saat kabel berdiri sendiri tanpa tetangga.
+   Shape: Plain square/circle in the center. Used when the cable stands alone with no neighbors.
 2. water-power-cable-end.png
-   Bentuk: Kabel yang memiliki ujung tumpul di satu sisi (sisi Kanan/0°).
+   Shape: Cable with a blunt end on one side (Right side/0°).
 3. water-power-cable-straight.png
-   Bentuk: Garis lurus horizontal dari ujung Kiri ke Kanan (0°).
+   Shape: Straight horizontal line from Left to Right end (0°).
 4. water-power-cable-bend.png
-   Bentuk: Huruf L atau siku-siku yang menghubungkan sisi Kanan dan Atas (0°).
+   Shape: L-shape or right angle connecting the Right and Up sides (0°).
 5. water-power-cable-t.png
-   Bentuk: Huruf T yang menghubungkan sisi Kiri, Kanan, dan Atas (0°) (bagian bawahnya rata/buntu).
+   Shape: T-shape connecting Left, Right, and Up sides (0°) (the bottom side is flat/dead end).
 6. water-power-cable-four.png
-   Bentuk: Tanda tambah (+) yang menghubungkan ke semua 4 arah mata angin secara simetris.
+   Shape: Plus sign (+) connecting symmetrically to all 4 cardinal directions.
 
 
-# Cara Membuat Struktur File Gambar (-glow)
+# How to Create Glow Image File Structure (-glow)
 
-Anda perlu menduplikasi bentuk dari 6 gambar sebelumnya, tetapi sisakan hanya bagian inti tengah yang ingin dibuat menyala (misal garis tembaga/neon di tengah kabel).
-Berikan latar belakang transparan (.png), lalu warnai bagian menyala tersebut dengan warna putih polos agar warnanya bisa disesuaikan secara otomatis oleh fungsi Draw.color() di dalam game.
-Simpan file tambahan tersebut di folder assets/sprites/ dengan nama:
+You need to duplicate the shapes of the previous 6 images, but leave only the core center parts that you want to illuminate (e.g., copper lines or neon strips in the middle of the cable).
+Provide a transparent background (.png), then color the glowing parts solid plain white so its color can be adjusted dynamically by the Draw.color() function in-game.
+Save those additional files in the assets/sprites/ folder with the names:
 1. water-power-cable-single-glow.png
 2. water-power-cable-end-glow.png
 3. water-power-cable-straight-glow.png
@@ -134,18 +133,18 @@ Simpan file tambahan tersebut di folder assets/sprites/ dengan nama:
 */
 
 const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
-    // Spesifikasi blok
+    // Block specifications
     size: 1,
     health: 120,
-    maxNodes: 10,       // Jumlah maksimal link laser ke tiang biasa
-    laserRange: 6,       // Jarak jangkauan laser ke tiang biasa
+    maxNodes: 10,       // Maximum number of laser links to regular power nodes
+    laserRange: 6,       // Laser reach distance to regular power nodes
     
-    // KUNCI: Mengizinkan blok ini ditempel di pinggir pantai/daratan
-    // agar bisa menyentuh kabel air sekaligus tiang darat
+    // KEY: Allows this block to be placed on shorelines/land edges
+    // so it can touch water cables and land nodes simultaneously
     floating: true,
     placeableLiquid: true,
 
-    // KUNCI: Mengalirkan listrik langsung lewat kontak fisik/sentuhan blok
+    // KEY: Transmits electricity directly through physical contact/block touch
     conductivePower: true,
 
     load() {
@@ -154,7 +153,7 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
         this.glowRegion = Core.atlas.find(this.name + "-glow");
     },
 
-    // Efek visual menyala saat dialiri listrik
+    // Visual glow effect when powered
     draw(tile) {
         Draw.rect(this.baseRegion, tile.drawx(), tile.drawy());
 
@@ -172,26 +171,26 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
-// LOGIKA KONEKSI LASER
-// Blok ini bebas terhubung ke tiang listrik mana pun, 
-// KECUALI ke kabel bawah air (karena kabel air hanya mau terhubung lewat sentuhan fisik)
+// LASER CONNECTION LOGIC
+// This node can freely connect to any power structure,
+// EXCEPT to the underwater cable (because water cables only connect via physical proximity)
 cableTransitionNode.entityType = () => extend(PowerNode.PowerNodeEntity, {
     canConnectTo(other) {
-        // Cari nama internal dari kabel bawah air Anda (sesuai id di mod)
-        // Di sini kita asumsikan namanya "water-power-cable"
+        // Find the internal name of your underwater cable (matching your mod's ID structure)
+        // Here we assume its name is "water-power-cable"
         let waterCableBlock = Vars.content.getByName(ContentType.block, "your-mod-name-water-power-cable");
         
-        // Tolak koneksi laser jika tujuannya adalah kabel air
+        // Reject laser connection if the target destination is a water cable
         if (other.block === waterCableBlock) {
             return false;
         }
         
-        // Izinkan koneksi laser ke blok power lainnya (tiang listrik biasa, baterai, generator)
+        // Allow laser connections to other power blocks (regular nodes, batteries, generators)
         return true; 
     }
 });
 
-// Konfigurasi penempatan di menu build
+// Placement configuration in the build menu
 cableTransitionNode.category = Category.power;
 cableTransitionNode.buildVisibility = BuildVisibility.shown;
 cableTransitionNode.requirements = ItemStack.with(
@@ -200,11 +199,11 @@ cableTransitionNode.requirements = ItemStack.with(
     Items.silicon, 5
 );
 
-// Another Indonesian documentation
+// Image Asset Documentation
 /*
-# Aset Gambar yang Diperlukan (assets/sprites/)
+# Required Image Assets (assets/sprites/)
 1. cable-transition-node.png:
-   Desain tiang atau jangkar transisi khusus (bisa dibuat seperti tiang darat namun memiliki aksen pelampung atau lapisan besi tebal).
+   Special transition node or anchor design (can be modeled like a land node but with buoy accents or thick rust-proof metal plating).
 2. cable-transition-node-glow.png:
-   Bagian lampu indikator putih transparan yang akan menyala kuning saat jaringan aktif.
+   Transparent white indicator light part that will glow yellow when the grid is active.
 */
