@@ -9,23 +9,20 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 
 // 1. Declare a persistent global flag outside the event callback scope
 // This value is preserved across multiple ClientLoadEvent executions
-require("blocks"); 
-if (typeof rootTreeInjected === 'undefined') {
-    var rootTreeInjected = false;
-}
+require("blocks");
 Events.on(ClientLoadEvent, () => {
-    // 2. Fallback check: If the flag is set, stop execution immediately
-    if (rootTreeInjected) {
-        Log.info("Tech tree code already executed once. Skipping additional passes.");
-        return;
-    }
-
     const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
     const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
     const root = Blocks.powerNode;
 
     if (root && root.techNode != null && transition && waterCable) {
         
+        // 1. Check the static global trackers to see if this has already been registered
+        if (TechTree.all.contains(t => t.content === transition)) {
+            Log.info("Tech tree configurations already loaded statically. Skipping.");
+            return;
+        }
+
         const researchCostTrans = ItemStack.with(
             Items.copper, 45,
             Items.lead, 30,
@@ -37,45 +34,37 @@ Events.on(ClientLoadEvent, () => {
             Items.lead, 9
         );
 
-        // 3. Create singular node wrappers
+        // 2. Instantiate the functional tech nodes
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
         
-        // 4. Bind the block properties to the single instances
-        transition.techNode = customNodeA;
-        waterCable.techNode = customNodeB;
-
-        if (transition.techNodes == null) transition.techNodes = new Seq();
-        if (waterCable.techNodes == null) waterCable.techNodes = new Seq();
-        
-        transition.techNodes.add(customNodeA);
-        waterCable.techNodes.add(customNodeB);
-
-        // 5. Copy planet visibility properties
+        // 3. Match planet visualization definitions
         if (root.techNode.shownPlanets != null) {
             customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
             customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
         }
 
-        // 6. Push safely to tree vectors
+        // 4. Inject them into the hierarchy array tree loops
         if (root.techNode.children == null) root.techNode.children = new Seq();
         if (customNodeA.children == null) customNodeA.children = new Seq();
 
         root.techNode.children.add(customNodeA);
         customNodeA.children.add(customNodeB);
 
-        // 7. Push up to the planetary master lists
-        const globalRoot = root.techNode.rootNode;
-        if (globalRoot != null && globalRoot.all != null) {
-            if (!globalRoot.all.contains(customNodeA)) globalRoot.all.add(customNodeA);
-            if (!globalRoot.all.contains(customNodeB)) globalRoot.all.add(customNodeB);
-        }
+        // 5. THE ULTIMATE VISUAL FIX: Inject directly into the core engine list.
+        // This ensures the game rebuilds your nodes perfectly when changing planets!
+        TechTree.all.add(customNodeA);
+        TechTree.all.add(customNodeB);
 
-        // 8. CRITICAL STEP: Toggle the flag so subsequent event cycles exit cleanly
-        rootTreeInjected = true;
-        Log.info("Tech tree generation successfully locked!");
+        // Explicitly clear any lingering runtime duplicate caches 
+        transition.techNodes = Seq.with(customNodeA);
+        waterCable.techNodes = Seq.with(customNodeB);
+        transition.techNode = customNodeA;
+        waterCable.techNode = customNodeB;
+
+        Log.info("Statically locked into the core TechTree manifest!");
     } else {
-        Log.err("Tech tree injection failed! Missing modded blocks or core game references.");
+        Log.err("Tech tree hook dropped! Variable fields evaluating to null.");
     }
     
     Log.info("Блять!"); 
