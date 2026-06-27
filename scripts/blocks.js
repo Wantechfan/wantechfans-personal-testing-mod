@@ -3,8 +3,8 @@
 const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
-    maxNodes: 5,
-    laserRange: 4,
+    maxNodes: 0,
+    laserRange: 0,
     floating: true,
     placeableLiquid: true,
 
@@ -100,8 +100,7 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     size: 1,
     health: 120,
     maxNodes: 10,       
-    laserRange: 6,       
-    floating: true,
+    laserRange: 6,  
     placeableLiquid: true,
     conductivePower: true,
 
