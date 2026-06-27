@@ -8,70 +8,85 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     floating: true,
     placeableLiquid: true,
 
-    // Memuat seluruh variasi sprite saat game dimulai
     load() {
         this.super$load();
         
-        // Memuat sprite berdasarkan pola bentuk sambungan
-        this.singleRegion = Core.atlas.find(this.name + "-single"); // Sendirian (0 tetangga)
-        this.endRegion = Core.atlas.find(this.name + "-end");       // Ujung mati (1 tetangga)
-        this.straightRegion = Core.atlas.find(this.name + "-straight"); // Lurus (2 tetangga berlawanan)
-        this.bendRegion = Core.atlas.find(this.name + "-bend");     // Belokan L (2 tetangga siku)
-        this.tRegion = Core.atlas.find(this.name + "-t");           // Pertigaan T (3 tetangga)
-        this.fourWayRegion = Core.atlas.find(this.name + "-four");  // Perempatan (4 tetangga)
+        // 1. Muat Sprite Dasar (Normal)
+        this.singleRegion = Core.atlas.find(this.name + "-single");
+        this.endRegion = Core.atlas.find(this.name + "-end");
+        this.straightRegion = Core.atlas.find(this.name + "-straight");
+        this.bendRegion = Core.atlas.find(this.name + "-bend");
+        this.tRegion = Core.atlas.find(this.name + "-t");
+        this.fourWayRegion = Core.atlas.find(this.name + "-four");
+
+        // 2. Muat Sprite Glow (Bagian yang akan menyala)
+        // Nama file harus diakhiri dengan "-glow" di folder sprites Anda
+        this.singleGlow = Core.atlas.find(this.name + "-single-glow");
+        this.endGlow = Core.atlas.find(this.name + "-end-glow");
+        this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
+        this.bendGlow = Core.atlas.find(this.name + "-bend-glow");
+        this.tGlow = Core.atlas.find(this.name + "-t-glow");
+        this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
     draw(tile) {
-        // 1. Deteksi tetangga di 4 arah cardinal (Kanan=1, Atas=2, Kiri=4, Bawah=8)
+        // Logika Bitmasking untuk mencari arah tetangga
         let mask = 0;
-        if (tile.nearby(0) != null && tile.nearby(0).block() === this) mask |= 1; // Kanan
-        if (tile.nearby(1) != null && tile.nearby(1).block() === this) mask |= 2; // Atas
-        if (tile.nearby(2) != null && tile.nearby(2).block() === this) mask |= 4; // Kiri
-        if (tile.nearby(3) != null && tile.nearby(3).block() === this) mask |= 8; // Bawah
+        if (tile.nearby(0) != null && tile.nearby(0).block() === this) mask |= 1;  // Kanan
+        if (tile.nearby(1) != null && tile.nearby(1).block() === this) mask |= 2;  // Atas
+        if (tile.nearby(2) != null && tile.nearby(2).block() === this) mask |= 4;  // Kiri
+        if (tile.nearby(3) != null && tile.nearby(3).block() === this) mask |= 8;  // Bawah
 
         let region = this.singleRegion;
+        let glowRegion = this.singleGlow;
         let rotation = 0;
 
-        // 2. Logika Bitmask menentukan Jenis Sprite dan Rotasi Gambar
+        // Menentukan kecocokan bentuk sprite dasar dan sprite glow
         switch (mask) {
-            case 0: // 0 Tetangga: Sendirian
-                region = this.singleRegion;
-                rotation = 0;
-                break;
-                
-            // 1 Tetangga: Ujung Kabel (End Piece)
-            case 1: region = this.endRegion; rotation = 0; break;   // Tetangga di Kanan
-            case 2: region = this.endRegion; rotation = 90; break;  // Tetangga di Atas
-            case 4: region = this.endRegion; rotation = 180; break; // Tetangga di Kiri
-            case 8: region = this.endRegion; rotation = 270; break; // Tetangga di Bawah
+            case 0: region = this.singleRegion; glowRegion = this.singleGlow; rotation = 0; break;
+            
+            case 1: region = this.endRegion; glowRegion = this.endGlow; rotation = 0; break;
+            case 2: region = this.endRegion; glowRegion = this.endGlow; rotation = 90; break;
+            case 4: region = this.endRegion; glowRegion = this.endGlow; rotation = 180; break;
+            case 8: region = this.endRegion; glowRegion = this.endGlow; rotation = 270; break;
 
-            // 2 Tetangga: Jalur Lurus (Straight)
-            case 5:  // Kanan + Kiri (1 + 4)
-                region = this.straightRegion; rotation = 0; break;
-            case 10: // Atas + Bawah (2 + 8)
-                region = this.straightRegion; rotation = 90; break;
+            case 5:  region = this.straightRegion; glowRegion = this.straightGlow; rotation = 0; break;
+            case 10: region = this.straightRegion; glowRegion = this.straightGlow; rotation = 90; break;
 
-            // 2 Tetangga: Belokan Siku (Bend / L-Junction)
-            case 3:  region = this.bendRegion; rotation = 0; break;   // Kanan + Atas
-            case 6:  region = this.bendRegion; rotation = 90; break;  // Atas + Kiri
-            case 12: region = this.bendRegion; rotation = 180; break; // Kiri + Bawah
-            case 9:  region = this.bendRegion; rotation = 270; break; // Bawah + Kanan
+            case 3:  region = this.bendRegion; glowRegion = this.bendGlow; rotation = 0; break;
+            case 6:  region = this.bendRegion; glowRegion = this.bendGlow; rotation = 90; break;
+            case 12: region = this.bendRegion; glowRegion = this.bendGlow; rotation = 180; break;
+            case 9:  region = this.bendRegion; glowRegion = this.bendGlow; rotation = 270; break;
 
-            // 3 Tetangga: Pertigaan T (T-Junction)
-            case 7:  region = this.tRegion; rotation = 0; break;   // Kanan + Atas + Kiri (T menghadap Atas)
-            case 14: region = this.tRegion; rotation = 90; break;  // Atas + Kiri + Bawah (T menghadap Kiri)
-            case 13: region = this.tRegion; rotation = 180; break; // Kiri + Bawah + Kanan (T menghadap Bawah)
-            case 11: region = this.tRegion; rotation = 270; break; // Bawah + Kanan + Atas (T menghadap Kanan)
+            case 7:  region = this.tRegion; glowRegion = this.tGlow; rotation = 0; break;
+            case 14: region = this.tRegion; glowRegion = this.tGlow; rotation = 90; break;
+            case 13: region = this.tRegion; glowRegion = this.tGlow; rotation = 180; break;
+            case 11: region = this.tRegion; glowRegion = this.tGlow; rotation = 270; break;
 
-            // 4 Tetangga: Perempatan (4-Way Junction)
-            case 15: // Kanan + Atas + Kiri + Bawah
-                region = this.fourWayRegion;
-                rotation = 0;
-                break;
+            case 15: region = this.fourWayRegion; glowRegion = this.fourWayGlow; rotation = 0; break;
         }
 
-        // 3. Gambar sprite terpilih dengan rotasi yang sesuai ke layar game
+        // Gambar sprite dasar (selalu terlihat)
         Draw.rect(region, tile.drawx(), tile.drawy(), rotation);
+
+        // KUNCI: Ambil data entitas bangunan untuk memeriksa status listrik
+        let build = tile.build;
+        if (build != null && build.power != null) {
+            // Memeriksa jika ada produksi energi atau simpanan listrik di jaringannya
+            let graph = build.power.graph;
+            if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
+                
+                // Atur warna menyala (Default kuning/oranye khas listrik Mindustry)
+                // Anda bisa mengganti Pal.powerLight dengan Color.valueOf("HEX_WARNA") jika ingin warna lain
+                Draw.color(Pal.powerLight); 
+                
+                // Gambar sprite glow di atas sprite dasar dengan mode pencahayaan game
+                Draw.blend(Blending.additive); // Membuat efek cahaya bertumpuk terang
+                Draw.rect(glowRegion, tile.drawx(), tile.drawy(), rotation);
+                Draw.blend(); // Reset mode blend ke normal
+                Draw.color(); // Reset warna ke normal
+            }
+        }
     }
 });
 
@@ -83,3 +98,37 @@ waterCable.entityType = () => extend(PowerNode.PowerNodeEntity, {
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
 waterCable.requirements = ItemStack.with(Items.copper, 5, Items.lead, 3);
+
+
+// Documentation (in Indonesian)
+// I don't fucking care if you're not Indonesian, atleast I can understand it.
+/*
+# Nama File Sprite yang Dibutuhkan (assets/sprites/)
+
+Agar kode di atas berjalan tanpa eror, Anda wajib membuat 6 file gambar terpisah di dalam folder sprite mod Anda dengan nama berikut:
+1. water-power-cable-single.png
+   Bentuk: Kotak/lingkaran polos di tengah. Digunakan saat kabel berdiri sendiri tanpa tetangga.
+2. water-power-cable-end.png
+   Bentuk: Kabel yang memiliki ujung tumpul di satu sisi (sisi Kanan/0°).
+3. water-power-cable-straight.png
+   Bentuk: Garis lurus horizontal dari ujung Kiri ke Kanan (0°).
+4. water-power-cable-bend.png
+   Bentuk: Huruf L atau siku-siku yang menghubungkan sisi Kanan dan Atas (0°).
+5. water-power-cable-t.png
+   Bentuk: Huruf T yang menghubungkan sisi Kiri, Kanan, dan Atas (0°) (bagian bawahnya rata/buntu).
+6. water-power-cable-four.png
+   Bentuk: Tanda tambah (+) yang menghubungkan ke semua 4 arah mata angin secara simetris.
+
+
+# Cara Membuat Struktur File Gambar (-glow)
+
+Anda perlu menduplikasi bentuk dari 6 gambar sebelumnya, tetapi sisakan hanya bagian inti tengah yang ingin dibuat menyala (misal garis tembaga/neon di tengah kabel).
+Berikan latar belakang transparan (.png), lalu warnai bagian menyala tersebut dengan warna putih polos agar warnanya bisa disesuaikan secara otomatis oleh fungsi Draw.color() di dalam game.
+Simpan file tambahan tersebut di folder assets/sprites/ dengan nama:
+1. water-power-cable-single-glow.png
+2. water-power-cable-end-glow.png
+3. water-power-cable-straight-glow.png
+4. water-power-cable-bend-glow.png
+5. water-power-cable-t-glow.png
+6. water-power-cable-four-glow.png
+*/
