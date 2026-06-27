@@ -11,69 +11,6 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // This value is preserved across multiple ClientLoadEvent executions
 require("blocks");
 Events.on(ClientLoadEvent, () => {
-    const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
-    const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
-    const root = Blocks.powerNode;
-
-    if (root && root.techNode != null && transition && waterCable) {
-        
-        // Ensure standard child tracking arrays are initialized
-        if (root.techNode.children == null) root.techNode.children = new Seq();
-
-        // --- STEP 1: PURGE PRE-EXISTING NODES TO STOP THE DUPLICATION ---
-        // This strips out any duplicates remaining from previous layout compilations
-        root.techNode.children.remove(t => t.content === transition || t.content === waterCable);
-        
-        const globalRoot = root.techNode.rootNode;
-        if (globalRoot != null && globalRoot.all != null) {
-            globalRoot.all.remove(t => t.content === transition || t.content === waterCable);
-        }
-
-        // --- STEP 2: BUILD CLEAN INSTANCES ---
-        const researchCostTrans = ItemStack.with(
-            Items.copper, 45,
-            Items.lead, 30,
-            Items.silicon, 15
-        );
-        
-        const researchCostCab = ItemStack.with(
-            Items.copper, 15,
-            Items.lead, 9
-        );
-
-        const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
-        const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
-        
-        // --- STEP 3: ASSIGN FIXED INDICES (OVERWRITE, DO NOT USE .add()) ---
-        transition.techNode = customNodeA;
-        waterCable.techNode = customNodeB;
-
-        // Force overwrite the internal list with a singular-element array
-        transition.techNodes = Seq.with(customNodeA);
-        waterCable.techNodes = Seq.with(customNodeB);
-
-        // Inherit planet definitions
-        if (root.techNode.shownPlanets != null) {
-            customNodeA.shownPlanets.clear();
-            customNodeB.shownPlanets.clear();
-            customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
-            customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
-        }
-
-        // --- STEP 4: RE-INJECT FRESH BRANCHES ---
-        customNodeA.children = Seq.with(customNodeB);
-        root.techNode.children.add(customNodeA);
-
-        if (globalRoot != null && globalRoot.all != null) {
-            globalRoot.all.add(customNodeA);
-            globalRoot.all.add(customNodeB);
-        }
-
-        Log.info("Tech tree layout completely sanitized and refreshed!");
-    } else {
-        Log.err("Tech tree injection failed! Variable fields evaluating to null.");
-    }
-    
     Log.info("Блять!"); 
 
     // Safely fetch content now that ClientLoadEvent has fired
