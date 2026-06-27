@@ -11,19 +11,19 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // This value is preserved across multiple ClientLoadEvent executions
 require("blocks");
 Events.on(ClientLoadEvent, () => {
-    // Look up the vanilla parent node you want to attach your custom branch to
-    const vanillaParent = TechTree.getallnodes().find(n => n.content === Blocks.powerNode);
+    // 1. CRITICAL PROTECTION: Check if our transition node is already registered globally.
+    // If it is present, exit immediately. This completely stops the planet-switching duplication!
+    if (TechTree.all != null && TechTree.all.contains(t => t.content === cableTransitionNode)) {
+        Log.info("Tech tree configurations already loaded. Skipping re-injection.");
+        return;
+    }
+
+    // 2. Fetch the vanilla root node cleanly via its content property
+    const vanillaParent = TechTree.all.find(n => n.content === Blocks.powerNode);
 
     if (vanillaParent != null) {
-        // --- STEP 1: FORCE-CLEAN ANY PREVIOUS EVENT RUN DUPLICATES ---
-        // Wipes out old layout nodes if you switch planet tabs back and forth
-        if (vanillaParent.children != null) {
-            vanillaParent.children.remove(t => t.content === cableTransitionNode);
-        }
-        TechTree.getallnodes().remove(t => t.content === cableTransitionNode || t.content === waterCable);
-
-        // --- STEP 2: REGISTER TRANSITION NODE ---
-        // Dynamically creates, setups, and appends the node directly to Blocks.powerNode
+        // --- REGISTER TRANSITION NODE ---
+        // Attaches cableTransitionNode directly under Blocks.powerNode
         TechTree.register(Blocks.powerNode, cableTransitionNode, () => {
             // Inherit the exact planetary settings (Serpulo tab visibility) from the parent
             if (vanillaParent.shownPlanets != null) {
@@ -37,8 +37,8 @@ Events.on(ClientLoadEvent, () => {
                 Items.silicon, 15
             );
 
-            // --- STEP 3: REGISTER WATER CABLE AS A CHILD ---
-            // Directly embeds the child creation code inside the parent block context
+            // --- REGISTER WATER CABLE AS A NESTED CHILD ---
+            // Attaches waterCable under your cableTransitionNode
             TechTree.register(cableTransitionNode, waterCable, () => {
                 if (vanillaParent.shownPlanets != null) {
                     waterCable.techNode.shownPlanets.addAll(vanillaParent.shownPlanets);
@@ -52,9 +52,9 @@ Events.on(ClientLoadEvent, () => {
             });
         });
 
-        Log.info("Tech tree securely generated via engine manifest registers!");
+        Log.info("Tech tree securely generated via native engine manifest registers!");
     } else {
-        Log.err("Could not find vanilla powerNode in the global TechTree configuration map.");
+        Log.err("Could not find vanilla powerNode in the global TechTree array map.");
     }
     
     Log.info("Блять!");
