@@ -10,61 +10,64 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // Execution
 require("blocks"); 
 Events.on(ClientLoadEvent, () => {
-    const researchCostTrans = ItemStack.with(
-        Items.copper, 45,
-        Items.lead, 30,
-        Items.silicon, 15
-    );
-    
-    const researchCostCab = ItemStack.with(
-        Items.copper, 15,
-        Items.lead, 9
-    );
-
     const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
     const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
     const root = Blocks.powerNode;
 
     if (root && root.techNode != null && transition && waterCable) {
         
-        // 1. Create the nodes
+        // 1. SAFETY CHECK: If transition already has a techNode, skip to avoid duplicates
+        if (transition.techNode != null || root.techNode.children.contains(t => t.content == transition)) {
+            Log.info("Tech tree nodes already injected. Skipping duplicate registration.");
+            return;
+        }
+
+        const researchCostTrans = ItemStack.with(
+            Items.copper, 45,
+            Items.lead, 30,
+            Items.silicon, 15
+        );
+        
+        const researchCostCab = ItemStack.with(
+            Items.copper, 15,
+            Items.lead, 9
+        );
+        
+        // 2. Create unique nodes
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
         
-        // 2. Link blocks directly to their node trackers
+        // 3. Link blocks directly to their node trackers
         transition.techNode = customNodeA;
         waterCable.techNode = customNodeB;
 
-        // --- THE VISUAL FIX ---
-        // Ensure the internal arrays are active and add the nodes to the block's UI memory
         if (transition.techNodes == null) transition.techNodes = new Seq();
         if (waterCable.techNodes == null) waterCable.techNodes = new Seq();
         
         transition.techNodes.add(customNodeA);
         waterCable.techNodes.add(customNodeB);
-        // ----------------------
 
-        // 3. Inherit planet restrictions
+        // 4. Inherit planet restrictions
         if (root.techNode.shownPlanets != null) {
             customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
             customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
         }
 
-        // 4. Safely attach to the hierarchy
+        // 5. Safely attach to the hierarchy
         if (root.techNode.children == null) root.techNode.children = new Seq();
         if (customNodeA.children == null) customNodeA.children = new Seq();
 
         root.techNode.children.add(customNodeA);
         customNodeA.children.add(customNodeB);
 
-        // 5. Inject into the master tracking array for the planet tree
+        // 6. Inject into the master tracking array for the planet tree
         const globalRoot = root.techNode.rootNode;
         if (globalRoot != null && globalRoot.all != null) {
             if (!globalRoot.all.contains(customNodeA)) globalRoot.all.add(customNodeA);
             if (!globalRoot.all.contains(customNodeB)) globalRoot.all.add(customNodeB);
         }
 
-        Log.info("Tech tree injection completely verified!");
+        Log.info("Tech tree injection clean and verified!");
     } else {
         Log.err("Tech tree injection failed! Missing blocks or rootNode.");
     }
