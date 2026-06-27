@@ -17,12 +17,19 @@ Events.on(ClientLoadEvent, () => {
 
     if (root && root.techNode != null && transition && waterCable) {
         
-        // 1. Check the static global trackers to see if this has already been registered
-        if (TechTree.all.contains(t => t.content === transition)) {
-            Log.info("Tech tree configurations already loaded statically. Skipping.");
-            return;
+        // Ensure standard child tracking arrays are initialized
+        if (root.techNode.children == null) root.techNode.children = new Seq();
+
+        // --- STEP 1: PURGE PRE-EXISTING NODES TO STOP THE DUPLICATION ---
+        // This strips out any duplicates remaining from previous layout compilations
+        root.techNode.children.remove(t => t.content === transition || t.content === waterCable);
+        
+        const globalRoot = root.techNode.rootNode;
+        if (globalRoot != null && globalRoot.all != null) {
+            globalRoot.all.remove(t => t.content === transition || t.content === waterCable);
         }
 
+        // --- STEP 2: BUILD CLEAN INSTANCES ---
         const researchCostTrans = ItemStack.with(
             Items.copper, 45,
             Items.lead, 30,
@@ -34,37 +41,37 @@ Events.on(ClientLoadEvent, () => {
             Items.lead, 9
         );
 
-        // 2. Instantiate the functional tech nodes
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
         
-        // 3. Match planet visualization definitions
+        // --- STEP 3: ASSIGN FIXED INDICES (OVERWRITE, DO NOT USE .add()) ---
+        transition.techNode = customNodeA;
+        waterCable.techNode = customNodeB;
+
+        // Force overwrite the internal list with a singular-element array
+        transition.techNodes = Seq.with(customNodeA);
+        waterCable.techNodes = Seq.with(customNodeB);
+
+        // Inherit planet definitions
         if (root.techNode.shownPlanets != null) {
+            customNodeA.shownPlanets.clear();
+            customNodeB.shownPlanets.clear();
             customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
             customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
         }
 
-        // 4. Inject them into the hierarchy array tree loops
-        if (root.techNode.children == null) root.techNode.children = new Seq();
-        if (customNodeA.children == null) customNodeA.children = new Seq();
-
+        // --- STEP 4: RE-INJECT FRESH BRANCHES ---
+        customNodeA.children = Seq.with(customNodeB);
         root.techNode.children.add(customNodeA);
-        customNodeA.children.add(customNodeB);
 
-        // 5. THE ULTIMATE VISUAL FIX: Inject directly into the core engine list.
-        // This ensures the game rebuilds your nodes perfectly when changing planets!
-        TechTree.all.add(customNodeA);
-        TechTree.all.add(customNodeB);
+        if (globalRoot != null && globalRoot.all != null) {
+            globalRoot.all.add(customNodeA);
+            globalRoot.all.add(customNodeB);
+        }
 
-        // Explicitly clear any lingering runtime duplicate caches 
-        transition.techNodes = Seq.with(customNodeA);
-        waterCable.techNodes = Seq.with(customNodeB);
-        transition.techNode = customNodeA;
-        waterCable.techNode = customNodeB;
-
-        Log.info("Statically locked into the core TechTree manifest!");
+        Log.info("Tech tree layout completely sanitized and refreshed!");
     } else {
-        Log.err("Tech tree hook dropped! Variable fields evaluating to null.");
+        Log.err("Tech tree injection failed! Variable fields evaluating to null.");
     }
     
     Log.info("Блять!"); 
