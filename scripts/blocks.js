@@ -21,14 +21,6 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     placeableLiquid: true,
 });
 
-// CRITICAL: Filter connection targets so it only links to itself
-waterCable.entityType = () => extend(PowerNode.PowerNodeEntity, {
-    canConnectTo(other) {
-        // Only allow connection if the other block is exactly this same cable type
-        return other.block === waterCable;
-    }
-});
-
 // Category and build costs
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
