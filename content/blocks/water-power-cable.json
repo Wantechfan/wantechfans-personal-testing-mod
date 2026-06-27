@@ -1,0 +1,9 @@
+{
+  "research": {
+    "parent": "cable-transition-node",
+    "requirements": [
+      "copper/15",
+      "lead/9"
+    ]
+  }
+}
