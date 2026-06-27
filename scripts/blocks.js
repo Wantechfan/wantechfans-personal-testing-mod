@@ -7,8 +7,14 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     health: 80,
     
     // Power network parameters
-    maxNodes: 5,            // Number of other water cables it can link to
-    laserRange: 4,          // How many tiles away it can reach to connect
+    outputsPower: true,     // Allows the block to supply power
+    consumesPower: false,   // Does not consume power itself
+    
+    // CRITICAL: Prevents power nodes from creating laser links to this block
+    connectedPower: false,  //
+    
+    // Allows the block to naturally touch and transmit power to adjacent touching blocks
+    conductivePower: true,  //
     
     // Placement rules for Deep Water
     floating: true,
