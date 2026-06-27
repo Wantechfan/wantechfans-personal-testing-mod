@@ -9,7 +9,7 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 
 // Execution
 require("blocks"); 
-Events.on(ClientLoadEvent, e => {
+Events.on(ClientLoadEvent, () => {
     const researchCostTrans = ItemStack.with(
         Items.copper, 45,
         Items.lead, 30,
