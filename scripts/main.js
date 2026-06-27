@@ -10,51 +10,69 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // 1. Declare a persistent global flag outside the event callback scope
 // This value is preserved across multiple ClientLoadEvent executions
 require("blocks");
+if (typeof treeInitialized === "undefined") {
+    var treeInitialized = false;
+}
 Events.on(ClientLoadEvent, () => {
-    // 1. CRITICAL PROTECTION: Check if our transition node is already registered globally.
-    // If it is present, exit immediately. This completely stops the planet-switching duplication!
-    if (TechTree.all != null && TechTree.all.contains(t => t.content === cableTransitionNode)) {
-        Log.info("Tech tree configurations already loaded. Skipping re-injection.");
-        return;
-    }
+    // Break immediately if this pass has already executed
+    if (treeInitialized) return;
 
-    // 2. Fetch the vanilla root node cleanly via its content property
-    const vanillaParent = TechTree.all.find(n => n.content === Blocks.powerNode);
+    const waterCable = Vars.content.getByName(ContentType.block, "wantech-test-mod-water-power-cable");
+    const transition = Vars.content.getByName(ContentType.block, "wantech-test-mod-cable-transition-node");
+    const root = Blocks.powerNode;
 
-    if (vanillaParent != null) {
-        // --- REGISTER TRANSITION NODE ---
-        // Attaches cableTransitionNode directly under Blocks.powerNode
-        TechTree.register(Blocks.powerNode, cableTransitionNode, () => {
-            // Inherit the exact planetary settings (Serpulo tab visibility) from the parent
-            if (vanillaParent.shownPlanets != null) {
-                cableTransitionNode.techNode.shownPlanets.addAll(vanillaParent.shownPlanets);
-            }
-            
-            // Assign custom costs for the transition block
-            cableTransitionNode.techNode.requirements = ItemStack.with(
-                Items.copper, 45,
-                Items.lead, 30,
-                Items.silicon, 15
-            );
+    // Verify all content blocks are fully loaded in memory
+    if (root && root.techNode != null && transition && waterCable) {
+        
+        // 1. Direct Parent Check: If transition is already a child, exit clean
+        if (root.techNode.children.contains(t => t.content === transition)) {
+            treeInitialized = true;
+            return;
+        }
 
-            // --- REGISTER WATER CABLE AS A NESTED CHILD ---
-            // Attaches waterCable under your cableTransitionNode
-            TechTree.register(cableTransitionNode, waterCable, () => {
-                if (vanillaParent.shownPlanets != null) {
-                    waterCable.techNode.shownPlanets.addAll(vanillaParent.shownPlanets);
-                }
+        const researchCostTrans = ItemStack.with(
+            Items.copper, 45,
+            Items.lead, 30,
+            Items.silicon, 15
+        );
+        
+        const researchCostCab = ItemStack.with(
+            Items.copper, 15,
+            Items.lead, 9
+        );
 
-                // Assign custom costs for the cable block
-                waterCable.techNode.requirements = ItemStack.with(
-                    Items.copper, 15,
-                    Items.lead, 9
-                );
-            });
-        });
+        // 2. Instantiate structural TechNodes manually (bypassing the broken .register method)
+        const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
+        const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
+        
+        // 3. Explicitly overwrite the item array lists with singular arrays (Blocks the duplication rows)
+        transition.techNode = customNodeA;
+        waterCable.techNode = customNodeB;
+        transition.techNodes = Seq.with(customNodeA);
+        waterCable.techNodes = Seq.with(customNodeB);
 
-        Log.info("Tech tree securely generated via native engine manifest registers!");
+        // 4. Inherit planet restrictions (Serpulo visibility) safely
+        if (root.techNode.shownPlanets != null) {
+            customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
+            customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
+        }
+
+        // 5. Structure the nested hierarchy tree
+        customNodeA.children = Seq.with(customNodeB);
+        root.techNode.children.add(customNodeA);
+
+        // 6. Push directly up to the planetary master root tracking map
+        const globalRoot = root.techNode.rootNode;
+        if (globalRoot != null && globalRoot.all != null) {
+            if (!globalRoot.all.contains(customNodeA)) globalRoot.all.add(customNodeA);
+            if (!globalRoot.all.contains(customNodeB)) globalRoot.all.add(customNodeB);
+        }
+
+        // 7. Lock the initialized state
+        treeInitialized = true;
+        Log.info("Tech tree securely hardcoded into engine database maps!");
     } else {
-        Log.err("Could not find vanilla powerNode in the global TechTree array map.");
+        Log.err("Tech tree assignment failed: Modded block fields evaluated to null.");
     }
     
     Log.info("Блять!");
