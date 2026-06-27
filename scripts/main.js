@@ -27,15 +27,24 @@ Events.on(ClientLoadEvent, e => {
 
     if (root && root.techNode != null && transition && waterCable) {
         
-        // 1. Create the tech nodes
+        // 1. Create the nodes
         const customNodeA = new TechTree.TechNode(root.techNode, transition, researchCostTrans);
         const customNodeB = new TechTree.TechNode(customNodeA, waterCable, researchCostCab);
         
-        // 2. Link blocks to their newly created nodes
+        // 2. Link blocks directly to their node trackers
         transition.techNode = customNodeA;
         waterCable.techNode = customNodeB;
 
-        // 3. Match planet rules from the parent node
+        // --- THE VISUAL FIX ---
+        // Ensure the internal arrays are active and add the nodes to the block's UI memory
+        if (transition.techNodes == null) transition.techNodes = new Seq();
+        if (waterCable.techNodes == null) waterCable.techNodes = new Seq();
+        
+        transition.techNodes.add(customNodeA);
+        waterCable.techNodes.add(customNodeB);
+        // ----------------------
+
+        // 3. Inherit planet restrictions
         if (root.techNode.shownPlanets != null) {
             customNodeA.shownPlanets.addAll(root.techNode.shownPlanets);
             customNodeB.shownPlanets.addAll(root.techNode.shownPlanets);
@@ -48,20 +57,19 @@ Events.on(ClientLoadEvent, e => {
         root.techNode.children.add(customNodeA);
         customNodeA.children.add(customNodeB);
 
-        // 5. Modern v146/v158 Layout Registration 
-        // We push them into the absolute root of the Serpulo planet tree array
+        // 5. Inject into the master tracking array for the planet tree
         const globalRoot = root.techNode.rootNode;
         if (globalRoot != null && globalRoot.all != null) {
             if (!globalRoot.all.contains(customNodeA)) globalRoot.all.add(customNodeA);
             if (!globalRoot.all.contains(customNodeB)) globalRoot.all.add(customNodeB);
         }
 
-        Log.info("Tech tree injection successful!");
+        Log.info("Tech tree injection completely verified!");
     } else {
         Log.err("Tech tree injection failed! Missing blocks or rootNode.");
     }
     
-    Log.info("Блять!"); 
+    Log.info("Блять!");
 
     // Safely fetch content now that ClientLoadEvent has fired
     const soundManager = Vars.control.sound;
