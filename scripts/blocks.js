@@ -1,4 +1,4 @@
-// Fixed and perfected for Mindustry V7/V8 - Fully Crash Proofed
+// Fixed and perfected for Mindustry V7/V8 - Fully Sequential Power Flow
 
 const waterCable = extend(Block, "water-power-cable", {
     size: 1,
@@ -10,6 +10,11 @@ const waterCable = extend(Block, "water-power-cable", {
     update: true,            
     destructible: true,      
     drawLayer: Layer.floor,
+    
+    // Crucial: Tells the engine this block uses power internals natively
+    hasPower: true,
+    outputsPower: false,
+    consumesPower: false,
 
     load: function() {
         this.super$load();
@@ -85,28 +90,21 @@ const waterCable = extend(Block, "water-power-cable", {
     }
 });
 
-// FIX: Engine-safe instantiation using dynamic provisioning closures
 waterCable.buildType = prov(() => {
     return extend(Building, {
-        isCablePowered: false,
-
-        updateTile: function() {
-            this.super$updateTile();
-
-            var powered = false;
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team) {
-                    if (neighbor.block === cableTransitionNode && neighbor.power != null && neighbor.power.graph.getPowerBalance() > 0) {
-                        powered = true;
-                        break;
-                    } else if (neighbor.block === waterCable && neighbor.isCablePowered) {
-                        powered = true;
-                        break;
+        
+        // Formulates a clean network linkage with adjacent cables immediately on placement
+        onProximityUpdate: function() {
+            this.super$onProximityUpdate();
+            
+            if (this.power != null && this.power.graph != null) {
+                for (var i = 0; i < 4; i++) {
+                    var neighbor = this.nearby(i);
+                    if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
+                        this.power.graph.merge(neighbor.power.graph);
                     }
                 }
             }
-            this.isCablePowered = powered;
         },
 
         draw: function() {
@@ -141,7 +139,8 @@ waterCable.buildType = prov(() => {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            if (this.isCablePowered) {
+            // Checks the engine's built-in power graph stability to toggle glows accurately down the chain
+            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
@@ -176,6 +175,21 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
+        
+        // Bridges standard power grids straight into your water-power-cables seamlessly
+        onProximityUpdate: function() {
+            this.super$onProximityUpdate();
+            
+            if (this.power != null && this.power.graph != null) {
+                for (var i = 0; i < 4; i++) {
+                    var neighbor = this.nearby(i);
+                    if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
+                        this.power.graph.merge(neighbor.power.graph);
+                    }
+                }
+            }
+        },
+
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
@@ -189,6 +203,7 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
+            // Rejects laser wire generation to waterCables so connection stays purely structural
             return other.block !== waterCable; 
         }
     });
