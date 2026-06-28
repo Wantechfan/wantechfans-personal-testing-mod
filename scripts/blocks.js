@@ -6,8 +6,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     maxNodes: 0,
     laserRange: 0,
     floating: true,
-    placeableLiquid: true,  // FIX {1}: Ensures it can only be placed on liquids
-    placeableOn: false,     // FIX {1}: Block placement validation forcing strictly liquid environments
+    placeableLiquid: true,
     solid: false,
     hasShadow: false,
     drawLayer: Layer.floor, // Forces it to draw flat under units/ships
@@ -15,7 +14,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     load: function() {
         this.super$load();
         
-        // 1. Load Base Sprites (Normal)
+        // Load Base Sprites
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -23,7 +22,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
-        // 2. Load Glow Sprites
+        // Load Glow Sprites
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -32,10 +31,11 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
-    // FIX {3}: Prevents any other standard power layout block from scanning and linking to this cable
-    canLink: function(tile, other) {
-        if (!other) return false;
-        return other.block === this || other.block === cableTransitionNode;
+    // FIX {1}: Blocks ground placement entirely during player construction attempts
+    canPlaceOn: function(tile, team, x, y, rotation) {
+        if (tile == null) return false;
+        // returns true only if the tile floor is inherently liquid-based
+        return tile.floor().isLiquid;
     }
 });
 
@@ -43,13 +43,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         
-        // FIX {3}: This isolates proximity connectivity entirely at the grid level
+        // FIX {3}: This completely destroys proximity power linking to standard machines
         addPowerNodes: function() {
-            // Do not call super$addPowerNodes() to stop default auto-linking behavior.
-            // Manually add adjacent cables or transition nodes instead:
+            // Overriding completely without calling super$addPowerNodes() kills proximity sharing
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    // Forcefully only accept connectivity loops if neighbor is cable or transition block
                     if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
                         this.power.graph.add(neighbor.power.graph);
                     }
@@ -90,18 +90,19 @@ waterCable.buildType = function() {
             // Draw the base sprite
             Draw.rect(region, this.x, this.y, rotation);
 
-            // FIX {1}: Unpowered glow displays as flat gray
-            if (this.power == null || this.power.graph.getPowerBalance() <= 0) {
-                Draw.color(Color.gray);
-                Draw.rect(glowRegion, this.x, this.y, rotation);
-                Draw.color();
-            } else {
-                // FIX {2}: Direct Hex value force fixes alpha saturation to display classic yellow
-                Draw.color(Color.valueOf("feb380")); 
+            // Check grid graph numbers explicitly to ensure glow colors adapt
+            if (this.power != null && this.power.graph != null && this.power.graph.getLastPowerProduced() > 0) {
+                // FIX {2}: Forces a sharp, bright solid yellow color profile over texture matrix
+                Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.blend(); 
                 Draw.color(); 
+            } else {
+                // FIX {1}: Unpowered flat dark gray sprite overlay style
+                Draw.color(Color.darkGray);
+                Draw.rect(glowRegion, this.x, this.y, rotation);
+                Draw.color();
             }
         },
 
@@ -129,27 +130,23 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
-// V8 Building definition for the transition node
+// V7 Building definition for the transition node
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
-            if (this.power != null) {
-                var graph = this.power.graph;
-                if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
-                    Draw.color(Color.valueOf("feb380")); // Match yellow color profile
-                    Draw.blend(Blending.additive);
-                    Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
-                    Draw.blend();
-                    Draw.color();
-                }
+            if (this.power != null && this.power.graph != null && this.power.graph.getLastPowerProduced() > 0) {
+                Draw.color(Color.yellow);
+                Draw.blend(Blending.additive);
+                Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
+                Draw.blend();
+                Draw.color();
             }
         },
 
         canConnectTo: function(other) {
-            // Allow transition nodes to hit normal targets and water cables
-            return true; 
+            return other.block === waterCable || other.block === cableTransitionNode || other.block.hasPower; 
         }
     });
 };
