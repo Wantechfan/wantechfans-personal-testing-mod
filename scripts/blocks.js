@@ -88,21 +88,8 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 });
 
 waterCable.buildType = prov(() => {
-    return extend(Building, {
-        
-        // Formulates a clean network linkage with adjacent cables immediately on placement
-        onProximityUpdate: function() {
-            this.super$onProximityUpdate();
-            
-            if (this.power != null && this.power.graph != null) {
-                for (var i = 0; i < 4; i++) {
-                    var neighbor = this.nearby(i);
-                    if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
-                        this.power.graph.merge(neighbor.power.graph);
-                    }
-                }
-            }
-        },
+    return extend(PowerNode.PowerNodeBuild, waterCable, {
+        // REMOVED: onProximityUpdate (The PowerNode class handles this natively now!)
 
         draw: function() {
             var mask = 0;
@@ -136,7 +123,6 @@ waterCable.buildType = prov(() => {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Checks the engine's built-in power graph stability to toggle glows accurately down the chain
             if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
@@ -172,20 +158,7 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
-        
-        // Bridges standard power grids straight into your water-power-cables seamlessly
-        onProximityUpdate: function() {
-            this.super$onProximityUpdate();
-            
-            if (this.power != null && this.power.graph != null) {
-                for (var i = 0; i < 4; i++) {
-                    var neighbor = this.nearby(i);
-                    if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
-                        this.power.graph.merge(neighbor.power.graph);
-                    }
-                }
-            }
-        },
+        // REMOVED: onProximityUpdate
 
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
@@ -200,7 +173,6 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
-            // Rejects laser wire generation to waterCables so connection stays purely structural
             return other.block !== waterCable; 
         }
     });
