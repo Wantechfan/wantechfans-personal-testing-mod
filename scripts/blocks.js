@@ -1,3 +1,4 @@
+// Clean and optimized for Mindustry V7/V8
 const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
@@ -9,7 +10,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     destructible: true,      
     drawLayer: Layer.floor,
 
-    // Power Node specific configurations to turn off visible lasers:
+    // Turn off standard wire visual connections entirely
     maxNodes: 0,
     laserRange: 0,
 
@@ -87,27 +88,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     }
 });
 
+// FIXED: Using prov() format properly ensures internal structures instantiate cleanly
 waterCable.buildType = prov(() => {
-    // Correctly passing 'waterCable' into the base builder context
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         
-        // Prevents the cable from building standard power connections to random touching blocks
-        adjacentPowerNodes: function() {
-            var list = new Seq();
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
-                        list.add(neighbor);
-                    }
-                }
-            }
-            return list;
-        },
-
-        // Restricts network connectivity mappings strictly to valid adjacent links
+        // CRITICAL FIX: Overriding this method stops the engine from auto-linking to standard factories/batteries
         getPowerConnections: function(list) {
-            list.clear(); 
+            list.clear();
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
@@ -184,29 +171,13 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
-cableTransitionNode.buildType = function() {
-    // CORRECTED: Restored 'cableTransitionNode' here so it no longer breaks rendering/becomes invisible!
+// FIXED: Wrapped inside prov() to fix the invisibility bug completely
+cableTransitionNode.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         
-        // Lets the transition node merge grids with adjacent water cables structurally
-        adjacentPowerNodes: function() {
-            var list = this.super$adjacentPowerNodes(); // Retains normal structural behaviors
-            
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
-                    if (!list.contains(neighbor)) {
-                        list.add(neighbor);
-                    }
-                }
-            }
-            return list;
-        },
-
-        // Connects lasers to normal structures but strictly structures adjacent grids to water cables
+        // Allows the node to interface with adjacent water cables while maintaining standard node rules
         getPowerConnections: function(list) {
             this.super$getPowerConnections(list); 
-            
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
@@ -219,14 +190,23 @@ cableTransitionNode.buildType = function() {
         },
 
         draw: function() {
-            // ... Your existing custom draw function stays completely the same ...
+            Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
+
+            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
+                Draw.color(Color.yellow);
+                Draw.blend(Blending.additive);
+                Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
+                Draw.blend();
+                Draw.color();
+            }
         },
 
+        // Prevents regular base lasers from linking directly onto a cable tile
         canConnectTo: function(other) {
-            return other.block !== waterCable; 
+            return other.block !== waterCable && this.super$canConnectTo(other); 
         }
     });
-};
+});
 
 cableTransitionNode.category = Category.power;
 cableTransitionNode.buildVisibility = BuildVisibility.shown;
