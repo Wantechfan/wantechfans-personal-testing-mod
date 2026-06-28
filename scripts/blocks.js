@@ -10,6 +10,10 @@ const waterCable = extend(Block, "water-power-cable", {
     update: true,            
     destructible: true,      
     drawLayer: Layer.floor,
+    
+    // Add these two lines to enable the power framework on this block:
+    hasPower: true,
+    outputsPower: true,
 
     load: function() {
         this.super$load();
