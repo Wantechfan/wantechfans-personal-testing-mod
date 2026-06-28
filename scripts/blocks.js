@@ -8,6 +8,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     floating: true,
     placeableLiquid: true,
 
+    canLink(tile, other) {
+        if (!other) return false;
+        const otherBlock = other.block;
+        
+        return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
+    }
+    
     load() {
         this.super$load();
         
