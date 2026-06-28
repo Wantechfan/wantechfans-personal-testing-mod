@@ -7,15 +7,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     laserRange: 0,
     floating: true,
     placeableLiquid: true,
+    solid: false,
+    targetable: false,
+    hasShadow: false,
+    drawLayer: Layer.floor, // Forces it to draw flat under units/ships
 
-    canLink(tile, other) {
-        if (!other) return false;
-        const otherBlock = other.block;
-        
-        return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
-    }
-    
-    load() {
+    // 1. Fix the method declaration syntax to use a colon (:)
+    load: function() {
         this.super$load();
         
         // 1. Load Base Sprites (Normal)
@@ -33,8 +31,14 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.bendGlow = Core.atlas.find(this.name + "-bend-glow");
         this.tGlow = Core.atlas.find(this.name + "-t-glow");
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
+    },
+
+    canLink(tile, other) {
+        if (!other) return false;
+        const otherBlock = other.block;
+        
+        return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
     }
-});
 
 // V7 Building definition for the cable
 waterCable.buildType = () => extend(PowerNode.PowerNodeBuild, waterCable, {
