@@ -1,4 +1,4 @@
-// Fixed and perfected for Mindustry V7/V8 without engine crashes
+// Fixed and perfected for Mindustry V7/V8 - Fully Crash Proofed
 
 const waterCable = extend(Block, "water-power-cable", {
     size: 1,
@@ -7,8 +7,8 @@ const waterCable = extend(Block, "water-power-cable", {
     placeableLiquid: true,
     solid: false,
     hasShadow: false,
-    update: true,            // Tells the engine to tick this block every frame
-    destructible: true,      // Ensures the player can deconstruct it safely
+    update: true,            
+    destructible: true,      
     drawLayer: Layer.floor,
 
     load: function() {
@@ -36,7 +36,6 @@ const waterCable = extend(Block, "water-power-cable", {
         return tile.floor().isLiquid;
     },
 
-    // Fixes the blueprint dragging texture selection
     drawPlanConfig: function(plan, list) {
         this.super$drawPlanConfig(plan, list);
         var mask = 0;
@@ -86,22 +85,18 @@ const waterCable = extend(Block, "water-power-cable", {
     }
 });
 
-waterCable.buildType = function() {
-    // Extending base Building removes all backend vanilla power node hooks completely
-    return extend(Building, waterCable, {
-        
-        // Tracks whether power is currently active across this custom chain link
+// FIX: Engine-safe instantiation using dynamic provisioning closures
+waterCable.buildType = prov(() => {
+    return extend(Building, {
         isCablePowered: false,
 
         updateTile: function() {
             this.super$updateTile();
 
-            // Run a quick proximity check to inherit power state from an active transition node or powered cable
             var powered = false;
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team) {
-                    // If connected to a transition node that has power, or an already verified powered cable
                     if (neighbor.block === cableTransitionNode && neighbor.power != null && neighbor.power.graph.getPowerBalance() > 0) {
                         powered = true;
                         break;
@@ -146,7 +141,6 @@ waterCable.buildType = function() {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Adapts its glowing state instantly depending on our clean custom variable
             if (this.isCablePowered) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
@@ -160,7 +154,7 @@ waterCable.buildType = function() {
             }
         }
     });
-};
+});
 
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
@@ -195,7 +189,6 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
-            // Rejects connecting directly to the cables via laser line configurations
             return other.block !== waterCable; 
         }
     });
