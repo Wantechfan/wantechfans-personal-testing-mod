@@ -8,7 +8,6 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     floating: true,
     placeableLiquid: true,
     solid: false,
-    targetable: false,
     hasShadow: false,
     drawLayer: Layer.floor, // Forces it to draw flat under units/ships
 
@@ -41,11 +40,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     }
 
 // V8 Building definition for the cable
+// Clear any previous assignment and bind via an explicit function block
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         draw: function() {
-            // Bitmasking logic: Checks for either another water cable OR a transition node
             var mask = 0;
+            
+            // Using standard counter for loop
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && (neighbor.block === waterCable || neighbor.block === cableTransitionNode)) {
@@ -57,34 +58,26 @@ waterCable.buildType = function() {
             var glowRegion = waterCable.singleGlow;
             var rotation = 0;
 
-            switch (mask) {
-                case 0: region = waterCable.singleRegion; glowRegion = waterCable.singleGlow; rotation = 0; break;
-                
-                case 1: region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 0; break;
-                case 2: region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 90; break;
-                case 4: region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 180; break;
-                case 8: region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 270; break;
+            // Direct mapping without inline break expressions inside object properties
+            if (mask === 0) { region = waterCable.singleRegion; glowRegion = waterCable.singleGlow; rotation = 0; }
+            else if (mask === 1) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 0; }
+            else if (mask === 2) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 90; }
+            else if (mask === 4) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 180; }
+            else if (mask === 8) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 270; }
+            else if (mask === 5) { region = waterCable.straightRegion; glowRegion = waterCable.straightGlow; rotation = 0; }
+            else if (mask === 10) { region = waterCable.straightRegion; glowRegion = waterCable.straightGlow; rotation = 90; }
+            else if (mask === 3) { region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 0; }
+            else if (mask === 6) { region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 90; }
+            else if (mask === 12) { region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 180; }
+            else if (mask === 9) { region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 270; }
+            else if (mask === 7) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 0; }
+            else if (mask === 14) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 90; }
+            else if (mask === 13) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 180; }
+            else if (mask === 11) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 270; }
+            else if (mask === 15) { region = waterCable.fourWayRegion; glowRegion = waterCable.fourWayGlow; rotation = 0; }
 
-                case 5:  region = waterCable.straightRegion; glowRegion = waterCable.straightGlow; rotation = 0; break;
-                case 10: region = waterCable.straightRegion; glowRegion = waterCable.straightGlow; rotation = 90; break;
-
-                case 3:  region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 0; break;
-                case 6:  region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 90; break;
-                case 12: region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 180; break;
-                case 9:  region = waterCable.bendRegion; glowRegion = waterCable.bendGlow; rotation = 270; break;
-
-                case 7:  region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 0; break;
-                case 14: region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 90; break;
-                case 13: region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 180; break;
-                case 11: region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 270; break;
-
-                case 15: region = waterCable.fourWayRegion; glowRegion = waterCable.fourWayGlow; rotation = 0; break;
-            }
-
-            // Draw the base sprite
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Visual glow effect logic
             if (this.power != null) {
                 var graph = this.power.graph;
                 if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
