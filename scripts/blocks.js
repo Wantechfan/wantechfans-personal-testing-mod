@@ -40,23 +40,22 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
     }
 
-// V7 Building definition for the cable
+// V8 Building definition for the cable
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
-        // FIX: Changed draw() { to draw: function() {
         draw: function() {
             // Bitmasking logic: Checks for either another water cable OR a transition node
-            let mask = 0;
-            for (let i = 0; i < 4; i++) {
-                let neighbor = this.nearby(i);
+            var mask = 0;
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
                 if (neighbor != null && (neighbor.block === waterCable || neighbor.block === cableTransitionNode)) {
                     mask |= (1 << i);
                 }
             }
 
-            let region = waterCable.singleRegion;
-            let glowRegion = waterCable.singleGlow;
-            let rotation = 0;
+            var region = waterCable.singleRegion;
+            var glowRegion = waterCable.singleGlow;
+            var rotation = 0;
 
             switch (mask) {
                 case 0: region = waterCable.singleRegion; glowRegion = waterCable.singleGlow; rotation = 0; break;
@@ -87,7 +86,7 @@ waterCable.buildType = function() {
 
             // Visual glow effect logic
             if (this.power != null) {
-                let graph = this.power.graph;
+                var graph = this.power.graph;
                 if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
                     Draw.color(Pal.powerLight); 
                     Draw.blend(Blending.additive); 
@@ -96,9 +95,8 @@ waterCable.buildType = function() {
                     Draw.color(); 
                 }
             }
-        }, // Separated by a comma because it's a property list
+        },
 
-        // FIX: Changed canConnectTo(other) { to canConnectTo: function(other) {
         canConnectTo: function(other) { 
             return other.block === waterCable || other.block === cableTransitionNode; 
         }
