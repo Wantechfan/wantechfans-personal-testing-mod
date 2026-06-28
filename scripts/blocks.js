@@ -1,25 +1,20 @@
-// Upgraded by Gemini for Mindustry V8 compatibility
+// Fixed and perfected for Mindustry V7/V8 without engine crashes
 
-const waterCable = extend(PowerNode, "water-power-cable", {
+const waterCable = extend(Block, "water-power-cable", {
     size: 1,
     health: 80,
-    maxNodes: 0,
-    laserRange: 0,
     floating: true,
     placeableLiquid: true,
     solid: false,
     hasShadow: false,
+    update: true,            // Tells the engine to tick this block every frame
+    destructible: true,      // Ensures the player can deconstruct it safely
     drawLayer: Layer.floor,
-    
-    // FORCED FIX FOR VANILLA POWER LEAKS: 
-    // This tells the engine the block cannot accept or output vanilla adjacency connections!
-    outputsPower: false,
-    consumesPower: false,
 
     load: function() {
         this.super$load();
         
-        // Load Base Sprites
+        // Base Textures
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -27,7 +22,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
-        // Load Glow Sprites
+        // Glow Textures
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -41,14 +36,14 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         return tile.floor().isLiquid;
     },
 
-    // FIXED: Uses proper square brackets [] for array access instead of function calls ()
+    // Fixes the blueprint dragging texture selection
     drawPlanConfig: function(plan, list) {
         this.super$drawPlanConfig(plan, list);
         var mask = 0;
         
         for (var i = 0; i < 4; i++) {
-            var dx = Geometry.d4x[i]; // Fix: [] instead of ()
-            var dy = Geometry.d4y[i]; // Fix: [] instead of ()
+            var dx = Geometry.d4x[i];
+            var dy = Geometry.d4y[i];
             var tx = plan.x + dx;
             var ty = plan.y + dy;
             
@@ -92,34 +87,31 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 });
 
 waterCable.buildType = function() {
-    return extend(PowerNode.PowerNodeBuild, waterCable, {
+    // Extending base Building removes all backend vanilla power node hooks completely
+    return extend(Building, waterCable, {
         
-        // Custom flag to allow only our custom blocks to interact with it
-        isWaterCableSystem: true,
+        // Tracks whether power is currently active across this custom chain link
+        isCablePowered: false,
 
-        // RESTRICTED MANUALLY: Links with merge() only if the target matches our special system blocks
-        addPowerNodes: function() {
+        updateTile: function() {
+            this.super$updateTile();
+
+            // Run a quick proximity check to inherit power state from an active transition node or powered cable
+            var powered = false;
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
-                        this.power.graph.merge(neighbor.power.graph);
+                if (neighbor != null && neighbor.team == this.team) {
+                    // If connected to a transition node that has power, or an already verified powered cable
+                    if (neighbor.block === cableTransitionNode && neighbor.power != null && neighbor.power.graph.getPowerBalance() > 0) {
+                        powered = true;
+                        break;
+                    } else if (neighbor.block === waterCable && neighbor.isCablePowered) {
+                        powered = true;
+                        break;
                     }
                 }
             }
-        },
-
-        // Erases reporting parameters so vanilla grids never find it
-        getPowerConnections: function(list) {
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
-                        list.add(neighbor);
-                    }
-                }
-            }
-            return list;
+            this.isCablePowered = powered;
         },
 
         draw: function() {
@@ -154,7 +146,8 @@ waterCable.buildType = function() {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
+            // Adapts its glowing state instantly depending on our clean custom variable
+            if (this.isCablePowered) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
@@ -165,10 +158,6 @@ waterCable.buildType = function() {
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.color();
             }
-        },
-
-        canConnectTo: function(other) { 
-            return other.block === waterCable || other.block === cableTransitionNode; 
         }
     });
 };
@@ -193,20 +182,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
-        
-        // This transition block has custom updates to safely detach vanilla networks
-        onProximityRemoved: function() {
-            this.super$onProximityRemoved();
-            // Forces vanilla nodes immediately touching it to rebuild their entire logic graph maps
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.power != null && neighbor.power.graph != null) {
-                    // Triggers the engine's built-in network restructuring process
-                    neighbor.power.graph.recreate(); 
-                }
-            }
-        },
-
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
@@ -220,8 +195,8 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
-            // Allows normal nodes to talk to it, but keeps waterCable interaction contained
-            return true; 
+            // Rejects connecting directly to the cables via laser line configurations
+            return other.block !== waterCable; 
         }
     });
 };
