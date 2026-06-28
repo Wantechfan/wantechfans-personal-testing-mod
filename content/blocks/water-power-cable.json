@@ -1,4 +1,7 @@
 {
+  "hasShadow": false,
+  "layer": "floor", 
+  "drawLayer": "floor"
   "solid": false,
   "research": {
     "parent": "cable-transition-node",
