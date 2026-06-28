@@ -89,7 +89,19 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 
 waterCable.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
-        // REMOVED: onProximityUpdate (The PowerNode class handles this natively now!)
+        // This forces the power grid to only connect to adjacent cables or transition nodes
+        getPowerConnections: function(list) {
+            list.clear(); // Clear any default laser connections
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
+        },
 
         draw: function() {
             var mask = 0;
@@ -158,21 +170,28 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
-        // REMOVED: onProximityUpdate
+        
+        // Allows the transition node to structurally connect to adjacent water cables
+        getPowerConnections: function(list) {
+            this.super$getPowerConnections(list); // Keep existing standard laser connections
+            
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
+                    if (!list.contains(neighbor)) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
+        },
 
         draw: function() {
-            Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
-
-            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
-                Draw.color(Color.yellow);
-                Draw.blend(Blending.additive);
-                Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
-                Draw.blend();
-                Draw.color();
-            }
+            // ... keep your existing draw function exactly as it is ...
         },
 
         canConnectTo: function(other) {
+            // Rejects standard laser wire generation to waterCables so connection stays purely structural
             return other.block !== waterCable; 
         }
     });
