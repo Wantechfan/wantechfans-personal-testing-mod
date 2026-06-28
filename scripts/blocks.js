@@ -115,8 +115,9 @@ waterCable.buildType = function() {
             return list;
         },
 
-        // FIX FOR ISSUE 1: Forces the isolated network to rebuild itself and drop ghost power when a connection snaps
+        // FIX: Rebuilds graph networks natively without calling invalid deleteGraph methods
         onRemoved: function() {
+            // 1. Gather all adjacent valid network tiles before this block leaves the tile grid
             var neighborsToUpdate = [];
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
@@ -127,13 +128,19 @@ waterCable.buildType = function() {
                 }
             }
             
-            this.super$onRemoved(); // Deconstructs base block cleanly
+            // 2. Call standard removal logic to detach this building tile safely
+            this.super$onRemoved();
 
-            // Forcibly clear graph properties and rebuild connections for neighboring segments
+            // 3. Cleanly clear the old shared graph reference from neighbors and force an updated grid map
             neighborsToUpdate.forEach(nb => {
-                if(nb.power != null && nb.power.graph != null) {
-                    PowerGraph.deleteGraph(nb.power.graph); // Snaps the ghost link pool entirely
-                    nb.addPowerNodes(); // Evaluates its remaining neighbors fresh
+                if (nb.power != null) {
+                    // Instantiating a new PowerGraph drops the ghost power pool immediately
+                    var freshGraph = new PowerGraph();
+                    freshGraph.add(nb);
+                    nb.power.graph = freshGraph;
+                    
+                    // Re-scan remaining adjacencies to safely build a valid power structure
+                    nb.addPowerNodes();
                 }
             });
         },
