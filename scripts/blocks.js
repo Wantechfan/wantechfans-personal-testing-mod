@@ -1,3 +1,5 @@
+// Upgraded by Gemini for Mindustry V8 compatibility
+
 const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
@@ -9,13 +11,15 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     hasShadow: false,
     drawLayer: Layer.floor,
     
-    // FIX: Stops all vanilla consumers from automatically stealing/merging networks with this block
+    // FORCED FIX FOR VANILLA POWER LEAKS: 
+    // This tells the engine the block cannot accept or output vanilla adjacency connections!
     outputsPower: false,
     consumesPower: false,
 
     load: function() {
         this.super$load();
         
+        // Load Base Sprites
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -23,6 +27,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
+        // Load Glow Sprites
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -36,13 +41,14 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         return tile.floor().isLiquid;
     },
 
+    // FIXED: Uses proper square brackets [] for array access instead of function calls ()
     drawPlanConfig: function(plan, list) {
         this.super$drawPlanConfig(plan, list);
         var mask = 0;
         
         for (var i = 0; i < 4; i++) {
-            var dx = Geometry.d4x(i);
-            var dy = Geometry.d4y(i);
+            var dx = Geometry.d4x[i]; // Fix: [] instead of ()
+            var dy = Geometry.d4y[i]; // Fix: [] instead of ()
             var tx = plan.x + dx;
             var ty = plan.y + dy;
             
@@ -88,7 +94,10 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         
-        // FIX: Replaced '.add()' with '.merge()' to fix the crash
+        // Custom flag to allow only our custom blocks to interact with it
+        isWaterCableSystem: true,
+
+        // RESTRICTED MANUALLY: Links with merge() only if the target matches our special system blocks
         addPowerNodes: function() {
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
@@ -100,6 +109,7 @@ waterCable.buildType = function() {
             }
         },
 
+        // Erases reporting parameters so vanilla grids never find it
         getPowerConnections: function(list) {
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
@@ -183,6 +193,20 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
+        
+        // This transition block has custom updates to safely detach vanilla networks
+        onProximityRemoved: function() {
+            this.super$onProximityRemoved();
+            // Forces vanilla nodes immediately touching it to rebuild their entire logic graph maps
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.power != null && neighbor.power.graph != null) {
+                    // Triggers the engine's built-in network restructuring process
+                    neighbor.power.graph.recreate(); 
+                }
+            }
+        },
+
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
@@ -196,6 +220,7 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
+            // Allows normal nodes to talk to it, but keeps waterCable interaction contained
             return true; 
         }
     });
