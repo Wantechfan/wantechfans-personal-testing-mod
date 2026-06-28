@@ -1,19 +1,20 @@
 // Fixed and upgraded by Gemini for Mindustry V8 compatibility
 
-const waterCable = extend(Block, "water-power-cable", {
+const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
+    maxNodes: 0,
+    laserRange: 0,
     floating: true,
     placeableLiquid: true,
     solid: false,
     hasShadow: false,
-    hasPower: true, // Tells the engine this block uses/processes power
-    outputsPower: true,
-    consumesPower: false,
-    drawLayer: Layer.floor,
+    drawLayer: Layer.floor, // Forces it to draw flat under units/ships
 
     load: function() {
         this.super$load();
+        
+        // Load Base Sprites
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -21,6 +22,7 @@ const waterCable = extend(Block, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
+        // Load Glow Sprites
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -29,6 +31,7 @@ const waterCable = extend(Block, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
+    // FIX {1}: Blocks ground placement entirely during player construction
     canPlaceOn: function(tile, team, x, y, rotation) {
         if (tile == null) return false;
         return tile.floor().isLiquid;
@@ -36,19 +39,11 @@ const waterCable = extend(Block, "water-power-cable", {
 });
 
 waterCable.buildType = function() {
-    return extend(Building, waterCable, {
-        // Manually link power graphs only between your custom blocks
-        placed: function() {
-            this.super$placed();
-            this.invalidatePowerGraph();
-        },
-
-        onProximityChanged: function() {
-            this.super$onProximityChanged();
-            this.invalidatePowerGraph();
-        },
-
-        invalidatePowerGraph: function() {
+    return extend(PowerNode.PowerNodeBuild, waterCable, {
+        
+        // FIX {3}: This completely stops surrounding blocks (like smelters) from automatically connecting to this block
+        addPowerNodes: function() {
+            // Bypass super behavior entirely to eliminate proximity auto-linking
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
@@ -57,6 +52,19 @@ waterCable.buildType = function() {
                     }
                 }
             }
+        },
+
+        // FIX {3} Part 2: If a vanilla block looks for this cable, pretend we are on team derelict so it refuses to link!
+        getPowerConnections: function(list) {
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
         },
 
         draw: function() {
@@ -89,19 +97,26 @@ waterCable.buildType = function() {
             else if (mask === 11) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 270; }
             else if (mask === 15) { region = waterCable.fourWayRegion; glowRegion = waterCable.fourWayGlow; rotation = 0; }
 
+            // Draw the base sprite
             Draw.rect(region, this.x, this.y, rotation);
 
-            if (this.power != null && this.power.graph != null && this.power.graph.getLastPowerProduced() > 0) {
+            // FIX {2}: Accurately adapt colors to the presence of energy flow
+            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.blend(); 
                 Draw.color(); 
             } else {
+                // FIX {1}: Unpowered gray state
                 Draw.color(Color.darkGray);
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.color();
             }
+        },
+
+        canConnectTo: function(other) { 
+            return other.block === waterCable || other.block === cableTransitionNode; 
         }
     });
 };
@@ -130,7 +145,7 @@ cableTransitionNode.buildType = function() {
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
-            if (this.power != null && this.power.graph != null && this.power.graph.getLastPowerProduced() > 0) {
+            if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
                 Draw.color(Color.yellow);
                 Draw.blend(Blending.additive);
                 Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
@@ -140,7 +155,7 @@ cableTransitionNode.buildType = function() {
         },
 
         canConnectTo: function(other) {
-            return other.block === waterCable || other.block === cableTransitionNode || other.block.hasPower; 
+            return true; 
         }
     });
 };
