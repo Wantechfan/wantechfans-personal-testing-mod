@@ -1,6 +1,5 @@
 {
   "solid": false,
-  "targetable": false
   "research": {
     "parent": "cable-transition-node",
     "requirements": [
