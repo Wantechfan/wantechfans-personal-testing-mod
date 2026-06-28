@@ -41,12 +41,24 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 });
 // V8 Building definition for the cable
 // Clear any previous assignment and bind via an explicit function block
-waterCable.buildType = function() {
+waterCable.buildType = function() { // <-- Changed ":" to "="
     return extend(PowerNode.PowerNodeBuild, waterCable, {
+        // FIX 1: Overriding proximity check so it refuses to give power to invalid neighbors
+        getPowerConnections: function(list) {
+            this.super$getPowerConnections(list);
+            
+            // Filter out any connection in the list that isn't a cable or transition node
+            for(var i = list.size - 1; i >= 0; i--) {
+                var other = list.get(i);
+                if(other.block !== waterCable && other.block !== cableTransitionNode) {
+                    list.remove(i);
+                }
+            }
+            return list;
+        },
+
         draw: function() {
             var mask = 0;
-            
-            // Using standard counter for loop
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && (neighbor.block === waterCable || neighbor.block === cableTransitionNode)) {
@@ -58,7 +70,6 @@ waterCable.buildType = function() {
             var glowRegion = waterCable.singleGlow;
             var rotation = 0;
 
-            // Direct mapping without inline break expressions inside object properties
             if (mask === 0) { region = waterCable.singleRegion; glowRegion = waterCable.singleGlow; rotation = 0; }
             else if (mask === 1) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 0; }
             else if (mask === 2) { region = waterCable.endRegion; glowRegion = waterCable.endGlow; rotation = 90; }
@@ -81,7 +92,8 @@ waterCable.buildType = function() {
             if (this.power != null) {
                 var graph = this.power.graph;
                 if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
-                    Draw.color(Pal.powerLight); 
+                    // FIX 2: Changed from Pal.powerLight (white/cyan) to Pal.power (classic yellow/orange)
+                    Draw.color(Pal.power); 
                     Draw.blend(Blending.additive); 
                     Draw.rect(glowRegion, this.x, this.y, rotation);
                     Draw.blend(); 
