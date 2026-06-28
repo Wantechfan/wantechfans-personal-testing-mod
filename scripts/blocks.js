@@ -1,4 +1,4 @@
-// Fixed and upgraded by Gemini for Mindustry V7 compatibility
+// Fixed and upgraded by Gemini for Mindustry V8 compatibility
 
 const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
@@ -6,12 +6,12 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     maxNodes: 0,
     laserRange: 0,
     floating: true,
-    placeableLiquid: true,
+    placeableLiquid: true,  // FIX {1}: Ensures it can only be placed on liquids
+    placeableOn: false,     // FIX {1}: Block placement validation forcing strictly liquid environments
     solid: false,
     hasShadow: false,
     drawLayer: Layer.floor, // Forces it to draw flat under units/ships
 
-    // 1. Fix the method declaration syntax to use a colon (:)
     load: function() {
         this.super$load();
         
@@ -32,29 +32,29 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
-    canLink(tile, other) {
+    // FIX {3}: Prevents any other standard power layout block from scanning and linking to this cable
+    canLink: function(tile, other) {
         if (!other) return false;
-        const otherBlock = other.block;
-        
-        return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
+        return other.block === this || other.block === cableTransitionNode;
     }
 });
+
 // V8 Building definition for the cable
-// Clear any previous assignment and bind via an explicit function block
-waterCable.buildType = function() { // <-- Changed ":" to "="
+waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
-        // FIX 1: Overriding proximity check so it refuses to give power to invalid neighbors
-        getPowerConnections: function(list) {
-            this.super$getPowerConnections(list);
-            
-            // Filter out any connection in the list that isn't a cable or transition node
-            for(var i = list.size - 1; i >= 0; i--) {
-                var other = list.get(i);
-                if(other.block !== waterCable && other.block !== cableTransitionNode) {
-                    list.remove(i);
+        
+        // FIX {3}: This isolates proximity connectivity entirely at the grid level
+        addPowerNodes: function() {
+            // Do not call super$addPowerNodes() to stop default auto-linking behavior.
+            // Manually add adjacent cables or transition nodes instead:
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
+                        this.power.graph.add(neighbor.power.graph);
+                    }
                 }
             }
-            return list;
         },
 
         draw: function() {
@@ -87,18 +87,21 @@ waterCable.buildType = function() { // <-- Changed ":" to "="
             else if (mask === 11) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 270; }
             else if (mask === 15) { region = waterCable.fourWayRegion; glowRegion = waterCable.fourWayGlow; rotation = 0; }
 
+            // Draw the base sprite
             Draw.rect(region, this.x, this.y, rotation);
 
-            if (this.power != null) {
-                var graph = this.power.graph;
-                if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
-                    // FIX 2: Changed from Pal.powerLight (white/cyan) to Pal.power (classic yellow/orange)
-                    Draw.color(Pal.power); 
-                    Draw.blend(Blending.additive); 
-                    Draw.rect(glowRegion, this.x, this.y, rotation);
-                    Draw.blend(); 
-                    Draw.color(); 
-                }
+            // FIX {1}: Unpowered glow displays as flat gray
+            if (this.power == null || this.power.graph.getPowerBalance() <= 0) {
+                Draw.color(Color.gray);
+                Draw.rect(glowRegion, this.x, this.y, rotation);
+                Draw.color();
+            } else {
+                // FIX {2}: Direct Hex value force fixes alpha saturation to display classic yellow
+                Draw.color(Color.valueOf("feb380")); 
+                Draw.blend(Blending.additive); 
+                Draw.rect(glowRegion, this.x, this.y, rotation);
+                Draw.blend(); 
+                Draw.color(); 
             }
         },
 
@@ -119,38 +122,37 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     maxNodes: 10,       
     laserRange: 6,
 
-    load() {
+    load: function() {
         this.super$load();
         this.baseRegion = Core.atlas.find(this.name);
         this.glowRegion = Core.atlas.find(this.name + "-glow");
     }
 });
 
-// V7 Building definition for the transition node
-cableTransitionNode.buildType = () => extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
-    draw() {
-        Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
+// V8 Building definition for the transition node
+cableTransitionNode.buildType = function() {
+    return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
+        draw: function() {
+            Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
-        if (this.power != null) {
-            let graph = this.power.graph;
-            if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
-                Draw.color(Pal.powerLight);
-                Draw.blend(Blending.additive);
-                Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
-                Draw.blend();
-                Draw.color();
+            if (this.power != null) {
+                var graph = this.power.graph;
+                if (graph.getPowerBalance() > 0 || graph.getLastPowerStored() > 0) {
+                    Draw.color(Color.valueOf("feb380")); // Match yellow color profile
+                    Draw.blend(Blending.additive);
+                    Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
+                    Draw.blend();
+                    Draw.color();
+                }
             }
-        }
-    },
+        },
 
-    // Rejects direct laser connections to underwater cables
-    canConnectTo(other) {
-        if (other.block === waterCable) {
-            return false;
+        canConnectTo: function(other) {
+            // Allow transition nodes to hit normal targets and water cables
+            return true; 
         }
-        return true; 
-    }
-});
+    });
+};
 
 cableTransitionNode.category = Category.power;
 cableTransitionNode.buildVisibility = BuildVisibility.shown;
