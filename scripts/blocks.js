@@ -38,7 +38,7 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         
         return otherBlock.name === this.name || otherBlock.name === "wantech-test-mod-cable-transition-node";
     }
-
+});
 // V8 Building definition for the cable
 // Clear any previous assignment and bind via an explicit function block
 waterCable.buildType = function() {
