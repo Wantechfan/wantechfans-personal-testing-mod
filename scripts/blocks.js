@@ -43,18 +43,30 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         
-        // FIX {3}: This completely destroys proximity power linking to standard machines
+        // INTERCEPT 1: Disables default auto-linking to surrounding nodes entirely
         addPowerNodes: function() {
-            // Overriding completely without calling super$addPowerNodes() kills proximity sharing
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    // Forcefully only accept connectivity loops if neighbor is cable or transition block
                     if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
                         this.power.graph.add(neighbor.power.graph);
                     }
                 }
             }
+        },
+
+        // INTERCEPT 2: Blocks surrounding buildings (like smelters) from discovering this node's power attributes
+        getPowerConnections: function(list) {
+            // Do not call super$getPowerConnections(list) as it grabs everything adjacent
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
         },
 
         draw: function() {
@@ -87,19 +99,15 @@ waterCable.buildType = function() {
             else if (mask === 11) { region = waterCable.tRegion; glowRegion = waterCable.tGlow; rotation = 270; }
             else if (mask === 15) { region = waterCable.fourWayRegion; glowRegion = waterCable.fourWayGlow; rotation = 0; }
 
-            // Draw the base sprite
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Check grid graph numbers explicitly to ensure glow colors adapt
             if (this.power != null && this.power.graph != null && this.power.graph.getLastPowerProduced() > 0) {
-                // FIX {2}: Forces a sharp, bright solid yellow color profile over texture matrix
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.blend(); 
                 Draw.color(); 
             } else {
-                // FIX {1}: Unpowered flat dark gray sprite overlay style
                 Draw.color(Color.darkGray);
                 Draw.rect(glowRegion, this.x, this.y, rotation);
                 Draw.color();
