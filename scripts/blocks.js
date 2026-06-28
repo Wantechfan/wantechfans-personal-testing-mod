@@ -107,9 +107,7 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     size: 1,
     health: 120,
     maxNodes: 10,       
-    laserRange: 6,  
-    placeableLiquid: true,
-    conductivePower: true,
+    laserRange: 6,
 
     load() {
         this.super$load();
