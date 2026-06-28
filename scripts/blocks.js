@@ -88,10 +88,26 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 });
 
 waterCable.buildType = prov(() => {
+    // Correctly passing 'waterCable' into the base builder context
     return extend(PowerNode.PowerNodeBuild, waterCable, {
-        // This forces the power grid to only connect to adjacent cables or transition nodes
+        
+        // Prevents the cable from building standard power connections to random touching blocks
+        adjacentPowerNodes: function() {
+            var list = new Seq();
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
+        },
+
+        // Restricts network connectivity mappings strictly to valid adjacent links
         getPowerConnections: function(list) {
-            list.clear(); // Clear any default laser connections
+            list.clear(); 
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
@@ -169,11 +185,27 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
 });
 
 cableTransitionNode.buildType = function() {
+    // CORRECTED: Restored 'cableTransitionNode' here so it no longer breaks rendering/becomes invisible!
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         
-        // Allows the transition node to structurally connect to adjacent water cables
+        // Lets the transition node merge grids with adjacent water cables structurally
+        adjacentPowerNodes: function() {
+            var list = this.super$adjacentPowerNodes(); // Retains normal structural behaviors
+            
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.block === waterCable && neighbor.power != null) {
+                    if (!list.contains(neighbor)) {
+                        list.add(neighbor);
+                    }
+                }
+            }
+            return list;
+        },
+
+        // Connects lasers to normal structures but strictly structures adjacent grids to water cables
         getPowerConnections: function(list) {
-            this.super$getPowerConnections(list); // Keep existing standard laser connections
+            this.super$getPowerConnections(list); 
             
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
@@ -187,11 +219,10 @@ cableTransitionNode.buildType = function() {
         },
 
         draw: function() {
-            // ... keep your existing draw function exactly as it is ...
+            // ... Your existing custom draw function stays completely the same ...
         },
 
         canConnectTo: function(other) {
-            // Rejects standard laser wire generation to waterCables so connection stays purely structural
             return other.block !== waterCable; 
         }
     });
