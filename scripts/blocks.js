@@ -1,4 +1,4 @@
-// Fixed and perfected for Mindustry V7/V8 - Fully Sequential Power Flow
+// Fixed and fully optimized for Mindustry V7/V8 - Multi-directional Chain Propagation
 
 const waterCable = extend(Block, "water-power-cable", {
     size: 1,
@@ -10,11 +10,6 @@ const waterCable = extend(Block, "water-power-cable", {
     update: true,            
     destructible: true,      
     drawLayer: Layer.floor,
-    
-    // Crucial: Tells the engine this block uses power internals natively
-    hasPower: true,
-    outputsPower: false,
-    consumesPower: false,
 
     load: function() {
         this.super$load();
