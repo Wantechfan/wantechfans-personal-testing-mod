@@ -1,6 +1,4 @@
-// Fixed and fully optimized for Mindustry V7/V8 - Multi-directional Chain Propagation
-
-const waterCable = extend(Block, "water-power-cable", {
+const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
     floating: true,
@@ -10,10 +8,10 @@ const waterCable = extend(Block, "water-power-cable", {
     update: true,            
     destructible: true,      
     drawLayer: Layer.floor,
-    
-    // Add these two lines to enable the power framework on this block:
-    hasPower: true,
-    outputsPower: true,
+
+    // Power Node specific configurations to turn off visible lasers:
+    maxNodes: 0,
+    laserRange: 0,
 
     load: function() {
         this.super$load();
