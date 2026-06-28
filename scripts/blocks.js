@@ -1,5 +1,3 @@
-// Upgraded by Gemini for Mindustry V8 compatibility
-
 const waterCable = extend(PowerNode, "water-power-cable", {
     size: 1,
     health: 80,
@@ -10,11 +8,14 @@ const waterCable = extend(PowerNode, "water-power-cable", {
     solid: false,
     hasShadow: false,
     drawLayer: Layer.floor,
+    
+    // FIX: Stops all vanilla consumers from automatically stealing/merging networks with this block
+    outputsPower: false,
+    consumesPower: false,
 
     load: function() {
         this.super$load();
         
-        // Load Base Sprites
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
@@ -22,7 +23,6 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
 
-        // Load Glow Sprites
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -36,26 +36,22 @@ const waterCable = extend(PowerNode, "water-power-cable", {
         return tile.floor().isLiquid;
     },
 
-    // FIX FOR ISSUE 2: Tells the blueprint renderer how to connect sprites when dragging plans!
     drawPlanConfig: function(plan, list) {
         this.super$drawPlanConfig(plan, list);
         var mask = 0;
         
-        // Check all 4 cardinal directions for either an existing built block or a matching dragging blueprint plan
         for (var i = 0; i < 4; i++) {
             var dx = Geometry.d4x(i);
             var dy = Geometry.d4y(i);
             var tx = plan.x + dx;
             var ty = plan.y + dy;
             
-            // Check real world tile first
             var tile = Vars.world.tile(tx, ty);
             if (tile != null && tile.build != null && (tile.build.block === this || tile.build.block === cableTransitionNode)) {
                 mask |= (1 << i);
                 continue;
             }
             
-            // Look through the blueprint placement list on your cursor array
             for (var j = 0; j < list.size; j++) {
                 var other = list.get(j);
                 if (other.x === tx && other.y === ty && (other.block === this || other.block === cableTransitionNode)) {
@@ -92,12 +88,13 @@ const waterCable = extend(PowerNode, "water-power-cable", {
 waterCable.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, waterCable, {
         
+        // FIX: Replaced '.add()' with '.merge()' to fix the crash
         addPowerNodes: function() {
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
                     if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
-                        this.power.graph.add(neighbor.power.graph);
+                        this.power.graph.merge(neighbor.power.graph);
                     }
                 }
             }
@@ -113,36 +110,6 @@ waterCable.buildType = function() {
                 }
             }
             return list;
-        },
-
-        // FIX: Rebuilds graph networks natively without calling invalid deleteGraph methods
-        onRemoved: function() {
-            // 1. Gather all adjacent valid network tiles before this block leaves the tile grid
-            var neighborsToUpdate = [];
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    if (neighbor.block === waterCable || neighbor.block === cableTransitionNode) {
-                        neighborsToUpdate.push(neighbor);
-                    }
-                }
-            }
-            
-            // 2. Call standard removal logic to detach this building tile safely
-            this.super$onRemoved();
-
-            // 3. Cleanly clear the old shared graph reference from neighbors and force an updated grid map
-            neighborsToUpdate.forEach(nb => {
-                if (nb.power != null) {
-                    // Instantiating a new PowerGraph drops the ghost power pool immediately
-                    var freshGraph = new PowerGraph();
-                    freshGraph.add(nb);
-                    nb.power.graph = freshGraph;
-                    
-                    // Re-scan remaining adjacencies to safely build a valid power structure
-                    nb.addPowerNodes();
-                }
-            });
         },
 
         draw: function() {
@@ -214,7 +181,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
-// V7 Building definition for the transition node
 cableTransitionNode.buildType = function() {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         draw: function() {
