@@ -226,7 +226,7 @@ waterCable.buildType = prov(() => {
 
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
-waterCable.requirements = ItemStack.with(Items.copper, 5, Items.lead, 3);
+waterCable.requirements = ItemStack.with(Items.copper, 1, Items.lead, 1);
 
 
 const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
