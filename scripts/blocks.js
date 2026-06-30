@@ -136,10 +136,10 @@ waterCable.buildType = prov(() => {
                     }
                 }
                 
-                // If a vanilla block sneaked in, smash the graph 
-                // This forces the engine to cleanly rebuild separate grids next frame
+                // If a vanilla block is detected, invalidate the network
+                // This forces a clean grid recalculation without crashing
                 if (hasInvalid) {
-                    graph.shatter(); 
+                    graph.invalidate(); 
                 }
             }
         },
