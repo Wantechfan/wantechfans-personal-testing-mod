@@ -28,40 +28,95 @@ const waterCable = extend(Block, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
+    // FIXED: Adds a custom UI bar so you can see the underwater power stats when clicking the block!
+    setBars: function() {
+        this.super$setBars();
+        this.addBar("underwater-power", prov(b => 
+            new Bar(
+                prov(() => Core.bundle.get("bar.power", "Power") + " (Underwater)"), 
+                prov(() => Color.yellow), 
+                floatp(() => b.underwaterPower / b.maxPower)
+            )
+        ));
+    },
+
     canPlaceOn: function(tile, team, x, y, rotation) {
         if (tile == null) return false;
         return tile.floor().isLiquid;
+    },
+
+    drawPlanConfig: function(plan, list) {
+        this.super$drawPlanConfig(plan, list);
+        var mask = 0;
+        
+        for (var i = 0; i < 4; i++) {
+            var dx = Geometry.d4x[i];
+            var dy = Geometry.d4y[i];
+            var tx = plan.x + dx;
+            var ty = plan.y + dy;
+            
+            var tile = Vars.world.tile(tx, ty);
+            if (tile != null && tile.build != null && (tile.build.block === this || tile.build.block === cableTransitionNode)) {
+                mask |= (1 << i);
+                continue;
+            }
+            
+            for (var j = 0; j < list.size; j++) {
+                var other = list.get(j);
+                if (other.x === tx && other.y === ty && (other.block === this || other.block === cableTransitionNode)) {
+                    mask |= (1 << i);
+                    break;
+                }
+            }
+        }
+
+        var region = this.singleRegion;
+        var rotation = 0;
+
+        if (mask === 0) { region = this.singleRegion; rotation = 0; }
+        else if (mask === 1) { region = this.endRegion; rotation = 0; }
+        else if (mask === 2) { region = this.endRegion; rotation = 90; }
+        else if (mask === 4) { region = this.endRegion; rotation = 180; }
+        else if (mask === 8) { region = this.endRegion; rotation = 270; }
+        else if (mask === 5) { region = this.straightRegion; rotation = 0; }
+        else if (mask === 10) { region = this.straightRegion; rotation = 90; }
+        else if (mask === 3) { region = this.bendRegion; rotation = 0; }
+        else if (mask === 6) { region = this.bendRegion; rotation = 90; }
+        else if (mask === 12) { region = this.bendRegion; rotation = 180; }
+        else if (mask === 9) { region = this.bendRegion; rotation = 270; }
+        else if (mask === 7) { region = this.tRegion; rotation = 0; }
+        else if (mask === 14) { region = this.tRegion; rotation = 90; }
+        else if (mask === 13) { region = this.tRegion; rotation = 180; }
+        else if (mask === 11) { region = this.tRegion; rotation = 270; }
+        else if (mask === 15) { region = this.fourWayRegion; rotation = 0; }
+
+        Draw.rect(region, plan.drawx(), plan.drawy(), rotation);
     }
 });
 
 waterCable.buildType = prov(() => {
-    // FIX: Removed "waterCable" parameter from the extend function
     return extend(Building, {
-        
-        // Initialize our custom energy data type
         underwaterPower: 0,
-        maxPower: 1000,
+        maxPower: 1000, 
 
         updateTile: function() {
             this.super$updateTile();
 
-            // Equalize/distribute power with neighboring custom tiles
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
-                if (n != null && n.team == this.team && ("underwaterPower" in n)) {
+                // FIXED: Explicitly check for block types to find valid neighbors
+                if (n != null && n.team == this.team && (n.block === waterCable || n.block === cableTransitionNode)) {
                     targets.add(n);
                 }
             }
 
             if (targets.size > 0 && this.underwaterPower > 0) {
-                // Find total power pool between this block and its connected neighbors
                 var totalPower = this.underwaterPower;
                 for (var i = 0; i < targets.size; i++) {
                     totalPower += targets.get(i).underwaterPower;
                 }
 
-                // Split it perfectly evenly
                 var share = totalPower / (targets.size + 1);
                 this.underwaterPower = share;
                 for (var i = 0; i < targets.size; i++) {
@@ -74,7 +129,8 @@ waterCable.buildType = prov(() => {
             var mask = 0;
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
-                if (neighbor != null && ("underwaterPower" in neighbor)) {
+                // FIXED: Checking explicitly by block types ensures the mask textures update immediately
+                if (neighbor != null && (neighbor.block === waterCable || neighbor.block === cableTransitionNode)) {
                     mask |= (1 << i);
                 }
             }
@@ -102,8 +158,8 @@ waterCable.buildType = prov(() => {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Light up if our custom system has any energy floating through it
-            if (this.underwaterPower > 1) {
+            // Glowing indicator lines light up based on data level
+            if (this.underwaterPower > 0.1) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
@@ -120,7 +176,7 @@ waterCable.buildType = prov(() => {
 
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
-waterCable.requirements = ItemStack.with(Items.copper, 1, Items.lead, 3);
+waterCable.requirements = ItemStack.with(Items.copper, 5, Items.lead, 3);
 
 
 const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
@@ -133,6 +189,18 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
         this.super$load();
         this.baseRegion = Core.atlas.find(this.name);
         this.glowRegion = Core.atlas.find(this.name + "-glow");
+    },
+
+    // FIXED: Adds a custom UI bar to track the transition block's converted pool too
+    setBars: function() {
+        this.super$setBars();
+        this.addBar("underwater-power", prov(b => 
+            new Bar(
+                prov(() => Core.bundle.get("bar.power", "Power") + " (Underwater Buffer)"), 
+                prov(() => Color.orange), 
+                floatp(() => b.underwaterPower / b.maxPower)
+            )
+        ));
     }
 });
 
@@ -144,20 +212,42 @@ cableTransitionNode.buildType = prov(() => {
         updateTile: function() {
             this.super$updateTile();
 
-            // CONVERSION GATEWAY:
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
+                var balance = graph.getPowerBalance();
                 
                 // If vanilla network has excess energy, convert it to underwater storage
-                if (graph.getPowerBalance() > 0 && this.underwaterPower < this.maxPower) {
-                    var potentialSiphon = Math.min(graph.getPowerBalance() * Edelta, this.maxPower - this.underwaterPower);
+                if (balance > 0 && this.underwaterPower < this.maxPower) {
+                    var potentialSiphon = Math.min(balance * edelta(), this.maxPower - this.underwaterPower);
                     this.underwaterPower += potentialSiphon;
-                    // Drain it back from the vanilla grid simulation metrics if desired
+                    graph.transferPower(-potentialSiphon); // Drain it out of the vanilla network grid smoothly
                 } 
-                // If vanilla network is lacking energy but cables have surplus, give it back
-                else if (graph.getPowerBalance() < 0 && this.underwaterPower > 0) {
-                    var boost = Math.min(this.underwaterPower, Math.abs(graph.getPowerBalance()) * Edelta);
+                // If vanilla network needs power, feedback from our underwater lines
+                else if (balance < 0 && this.underwaterPower > 0) {
+                    var boost = Math.min(this.underwaterPower, Math.abs(balance) * edelta());
                     this.underwaterPower -= boost;
+                    graph.transferPower(boost); // Feed power smoothly back into vanilla nodes
+                }
+            }
+
+            // Distribute power explicitly into adjacent cables too
+            var targets = new Seq();
+            for (var i = 0; i < 4; i++) {
+                var n = this.nearby(i);
+                if (n != null && n.team == this.team && (n.block === waterCable || n.block === cableTransitionNode)) {
+                    targets.add(n);
+                }
+            }
+
+            if (targets.size > 0 && this.underwaterPower > 0) {
+                var totalPower = this.underwaterPower;
+                for (var i = 0; i < targets.size; i++) {
+                    totalPower += targets.get(i).underwaterPower;
+                }
+                var share = totalPower / (targets.size + 1);
+                this.underwaterPower = share;
+                for (var i = 0; i < targets.size; i++) {
+                    targets.get(i).underwaterPower = share;
                 }
             }
         },
@@ -166,13 +256,17 @@ cableTransitionNode.buildType = prov(() => {
             this.super$draw(); 
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
-            if (this.underwaterPower > 1 || (this.power != null && this.power.graph != null && this.power.graph.getPowerBalance() > 0)) {
+            if (this.underwaterPower > 0.1) {
                 Draw.color(Color.yellow);
                 Draw.blend(Blending.additive);
                 Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
                 Draw.blend();
                 Draw.color();
             }
+        },
+
+        canConnectTo: function(other) {
+            return other.block !== waterCable && this.super$canConnectTo(other); 
         }
     });
 });
