@@ -177,9 +177,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     health: 120,
     maxNodes: 10,       
     laserRange: 6,
-    // EXPLICIT CONFIG: Telling the map engine that this block participates in production/consumption tasks
-    outputsPower: true,
-    consumesPower: true,
 
     load: function() {
         this.super$load();
@@ -203,49 +200,38 @@ cableTransitionNode.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         underwaterPower: 0,
         maxPower: 2000,
-        currentOp: 0, // State machine tracker: 1 = Drawing power, -1 = Distributing power
-
-        // NEW: Tell the engine graph to consume excess energy when grid is stable
-        getPowerRequired: function() {
-            if (this.power != null && this.power.graph != null && this.underwaterPower < this.maxPower) {
-                var graph = this.power.graph;
-                if (graph.getSatisfaction() >= 1.0 && graph.getPowerProduction() > 0) {
-                    return 30; // Ask for 30 units/sec from the network
-                }
-            }
-            return 0;
-        },
-
-        // NEW: Provide power to the local network directly if there's a shortage
-        getPowerProduction: function() {
-            if (this.power != null && this.power.graph != null && this.underwaterPower > 0) {
-                if (this.power.graph.getSatisfaction() < 1.0) {
-                    return Math.min(this.underwaterPower / Time.delta, 40); // Generate up to 40 units/sec
-                }
-            }
-            return 0;
-        },
 
         updateTile: function() {
             this.super$updateTile();
 
-            // Handle the internal buffer tracking based on engine calculation choices
+            // Siphon and distribute directly without breaking initialization parameters
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
                 
-                if (graph.getSatisfaction() >= 1.0 && this.underwaterPower < this.maxPower && graph.getPowerProduction() > 0) {
-                    // Siphon power into our custom internal array tracking
-                    var taken = 30 * Time.delta * graph.getSatisfaction();
-                    this.underwaterPower = Math.min(this.underwaterPower + taken, this.maxPower);
+                // Track generation balance directly from current frame statistics
+                var balance = graph.getPowerProduction() - graph.getPowerNeeded();
+                
+                if (balance > 0 && this.underwaterPower < this.maxPower) {
+                    var pull = Math.min(balance * Time.delta, this.maxPower - this.underwaterPower);
+                    this.underwaterPower += pull;
                 } 
-                else if (graph.getSatisfaction() < 1.0 && this.underwaterPower > 0) {
-                    // Drain buffer storage to help handle brownouts
-                    var provided = Math.min(40 * Time.delta, this.underwaterPower);
-                    this.underwaterPower -= provided;
+                else if (balance < 0 && this.underwaterPower > 0) {
+                    var totalDeficit = Math.abs(balance) * Time.delta;
+                    var boost = Math.min(this.underwaterPower, totalDeficit);
+                    
+                    // Directly dump the data block's charge back into the network pool if batteries exist
+                    if (graph.batteries.size > 0) {
+                        var dividedShare = boost / graph.batteries.size;
+                        for (var i = 0; i < graph.batteries.size; i++) {
+                            var b = graph.batteries.get(i);
+                            b.energy = Math.min(b.energy + dividedShare, b.block.consPower.capacity);
+                        }
+                        this.underwaterPower -= boost;
+                    }
                 }
             }
 
-            // Standard chain distribution down adjacent cable lines
+            // Standard cascade array chain mapping
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
