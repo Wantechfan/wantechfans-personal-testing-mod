@@ -119,7 +119,7 @@ waterCable.buildType = prov(() => {
             return other.block === waterCable || other.block === cableTransitionNode;
         },
 
-        // FIXED PROXIMITY ISOLATION
+        // CRASH-PROOF PROXIMITY ISOLATION
         onProximityUpdate: function() {
             this.super$onProximityUpdate();
             
@@ -127,7 +127,7 @@ waterCable.buildType = prov(() => {
                 var graph = this.power.graph;
                 var hasInvalid = false;
                 
-                // Scan for any forbidden vanilla power blocks
+                // Scan for any forbidden vanilla power blocks in our current grid
                 for (var i = 0; i < graph.all.size; i++) {
                     var b = graph.all.get(i);
                     if (b.block !== waterCable && b.block !== cableTransitionNode) {
@@ -136,10 +136,23 @@ waterCable.buildType = prov(() => {
                     }
                 }
                 
-                // If a vanilla block is detected, invalidate the network
-                // This forces a clean grid recalculation without crashing
+                // If a vanilla block is touching us, manually evict ourselves 
+                // from the dirty graph and create a pristine isolated one.
                 if (hasInvalid) {
-                    graph.invalidate(); 
+                    // 1. Remove this specific cable piece from the old shared graph lists
+                    graph.all.remove(this);
+                    if (graph.consumers != null) graph.consumers.remove(this);
+                    if (graph.producers != null) graph.producers.remove(this);
+                    if (graph.batteries != null) graph.batteries.remove(this);
+                    
+                    // 2. Instantiate a brand new, independent power network just for us
+                    var freshGraph = new PowerGraph();
+                    this.power.graph = freshGraph;
+                    
+                    // 3. Register ourselves into our new clean network
+                    freshGraph.all.add(this);
+                    if (this.block.consumersPower) freshGraph.consumers.add(this);
+                    if (this.block.outputsPower) freshGraph.producers.add(this);
                 }
             }
         },
