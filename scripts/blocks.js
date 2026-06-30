@@ -108,8 +108,14 @@ waterCable.buildType = prov(() => {
             return list;
         },
 
-        // NEW FIX: Prevents any external power nodes from establishing node-to-node links with this cable
+        // NEW FIX: Stops lasers from being manually or automatically dragged to this node
         canConnectTo: function(other) {
+            return other.block === waterCable || other.block === cableTransitionNode;
+        },
+
+        // ULTIMATE GRID FIX: Stops the game engine from merging power networks when built next to a power source
+        canPair: function(other) {
+            if (other == null) return false;
             return other.block === waterCable || other.block === cableTransitionNode;
         },
 
