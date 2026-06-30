@@ -119,62 +119,11 @@ waterCable.buildType = prov(() => {
             return other.block === waterCable || other.block === cableTransitionNode;
         },
 
-        // ULTIMATE PROXIMITY FIX: Forced isolation when vanilla blocks are built adjacent to the cable
+        // ULTIMATE PROXIMITY FIX: Simplified to allow the transition node to bridge networks safely
         onProximityUpdate: function() {
             this.super$onProximityUpdate();
-            
-            if (this.power != null && this.power.graph != null) {
-                var graph = this.power.graph;
-                var hasInvalid = false;
-                
-                // Scan the entire shared power network for unauthorized blocks
-                for (var i = 0; i < graph.all.size; i++) {
-                    var b = graph.all.get(i);
-                    if (b.block !== waterCable && b.block !== cableTransitionNode) {
-                        hasInvalid = true;
-                        break;
-                    }
-                }
-                
-                // If a vanilla node/source sneaked in, immediately split and isolate our cable network
-                if (hasInvalid) {
-                    var newGraph = new PowerGraph();
-                    var validBuildings = new Seq();
-                    var queue = new Seq();
-                    
-                    queue.add(this);
-                    validBuildings.add(this);
-                    
-                    // Flood-fill to find all valid connected cable pieces
-                    while (queue.size > 0) {
-                        var curr = queue.remove(0);
-                        for (var i = 0; i < 4; i++) {
-                            var n = curr.nearby(i);
-                            if (n != null && n.team == this.team && (n.block === waterCable || n.block === cableTransitionNode)) {
-                                if (!validBuildings.contains(n)) {
-                                    validBuildings.add(n);
-                                    queue.add(n);
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Migrate all connected cable elements out into a clean, isolated network graph
-                    for (var i = 0; i < validBuildings.size; i++) {
-                        var b = validBuildings.get(i);
-                        if (b.power != null) {
-                            graph.all.remove(b);
-                            graph.consumers.remove(b);
-                            graph.producers.remove(b);
-                            
-                            b.power.graph = newGraph;
-                            newGraph.all.add(b);
-                            if (b.block.consumersPower) newGraph.consumers.add(b);
-                            if (b.block.outputsPower) newGraph.producers.add(b);
-                        }
-                    }
-                }
-            }
+            // The overridden getPowerConnections and canPair methods already handle 
+            // isolating the cable, so we don't need to manually rip the graph apart here.
         },
 
         draw: function() {
@@ -269,8 +218,8 @@ cableTransitionNode.buildType = prov(() => {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
                     if (this.power.graph != neighbor.power.graph) {
-                        // Blend the two graphs together seamlessly
-                        this.power.graph.merge(neighbor.power.graph);
+                        // FIX: Changed .merge() to .addGraph()
+                        this.power.graph.addGraph(neighbor.power.graph);
                     }
                 }
             }
