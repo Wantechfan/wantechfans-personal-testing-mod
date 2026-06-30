@@ -152,7 +152,7 @@ waterCable.buildType = prov(() => {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            if (this.underwaterPower > 0.1) {
+            if (this.underwaterPower > 10) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
                 Draw.rect(glowRegion, this.x, this.y, rotation);
@@ -177,13 +177,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     health: 120,
     maxNodes: 10,       
     laserRange: 6,
-    outputsPower: true, // Allows getPowerProduction() to be recognized
-
-    init: function() {
-        this.super$init();
-        // SAFE INITIALIZATION: Registers a power consumer profile dynamically to prevent null pointer crashes
-        this.consumers.power(50); 
-    },
 
     load: function() {
         this.super$load();
@@ -208,38 +201,17 @@ cableTransitionNode.buildType = prov(() => {
         underwaterPower: 0,
         maxPower: 2000,
 
-        // Requests power dynamically up to 50 units if buffer isn't full
-        getPowerRequired: function() {
-            return (this.underwaterPower < this.maxPower) ? 50 : 0;
-        },
-
-        // Generates up to 50 units directly into local network grids experiencing a power drop
-        getPowerProduction: function() {
-            if (this.power != null && this.power.graph != null && this.underwaterPower > 0) {
-                if (this.power.graph.getSatisfaction() < 1.0) {
-                    return Math.min(this.underwaterPower / Time.delta, 50);
-                }
-            }
-            return 0;
-        },
-
         updateTile: function() {
             this.super$updateTile();
 
+            // Safely interface with the attached vanilla power grid graph
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
                 
-                // 1. Consume power if there's enough satisfaction
-                if (graph.getSatisfaction() >= 0.1 && this.underwaterPower < this.maxPower) {
-                    // Pull whatever the network managed to supply to this block's requested allotment
-                    var dynamicPull = 50 * graph.getSatisfaction() * Time.delta;
-                    this.underwaterPower = Math.min(this.underwaterPower + dynamicPull, this.maxPower);
-                }
-                
-                // 2. Discharging power to aid local grid brownouts
-                if (graph.getSatisfaction() < 1.0 && this.underwaterPower > 0) {
-                    var distributed = Math.min(50 * Time.delta, this.underwaterPower);
-                    this.underwaterPower -= distributed;
+                // 1. Charge the buffer if the vanilla network is fully satisfied (Satisfaction >= 1.0)
+                if (graph.getSatisfaction() >= 1.0 && this.underwaterPower < this.maxPower) {
+                    // Pull 10 power units per second scaled to delta time
+                    this.underwaterPower = Math.min(this.underwaterPower + (10 * Time.delta), this.maxPower);
                 }
             }
 
@@ -269,7 +241,7 @@ cableTransitionNode.buildType = prov(() => {
             this.super$draw(); 
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
-            if (this.underwaterPower > 0.1) {
+            if (this.underwaterPower > 10) {
                 Draw.color(Color.yellow);
                 Draw.blend(Blending.additive);
                 Draw.rect(cableTransitionNode.glowRegion, this.x, this.y);
