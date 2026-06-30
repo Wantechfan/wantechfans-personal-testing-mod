@@ -119,7 +119,7 @@ waterCable.buildType = prov(() => {
             return other.block === waterCable || other.block === cableTransitionNode;
         },
 
-        // ULTIMATE PROXIMITY FIX: Simplified to allow the transition node to bridge networks safely
+        // FIXED PROXIMITY ISOLATION
         onProximityUpdate: function() {
             this.super$onProximityUpdate();
             
@@ -127,7 +127,7 @@ waterCable.buildType = prov(() => {
                 var graph = this.power.graph;
                 var hasInvalid = false;
                 
-                // Check if any non-cable/non-transition block sneaked into this graph
+                // Scan for any forbidden vanilla power blocks
                 for (var i = 0; i < graph.all.size; i++) {
                     var b = graph.all.get(i);
                     if (b.block !== waterCable && b.block !== cableTransitionNode) {
@@ -136,39 +136,10 @@ waterCable.buildType = prov(() => {
                     }
                 }
                 
-                // If an invalid block is found, rebuild an isolated graph for the cables
+                // If a vanilla block sneaked in, smash the graph 
+                // This forces the engine to cleanly rebuild separate grids next frame
                 if (hasInvalid) {
-                    var newGraph = new PowerGraph();
-                    var validBuildings = new Seq();
-                    var queue = new Seq();
-                    
-                    queue.add(this);
-                    validBuildings.add(this);
-                    
-                    while (queue.size > 0) {
-                        var curr = queue.remove(0);
-                        for (var i = 0; i < 4; i++) {
-                            var n = curr.nearby(i);
-                            if (n != null && n.team == this.team && (n.block === waterCable || n.block === cableTransitionNode)) {
-                                if (!validBuildings.contains(n)) {
-                                    validBuildings.add(n);
-                                    queue.add(n);
-                                }
-                            }
-                        }
-                    }
-                    
-                    for (var i = 0; i < validBuildings.size; i++) {
-                        var b = validBuildings.get(i);
-                        if (b.power != null) {
-                            graph.all.remove(b);
-                            graph.consumers.remove(b);
-                            graph.producers.remove(b);
-                            
-                            b.power.graph = newGraph;
-                            newGraph.all.add(b);
-                        }
-                    }
+                    graph.shatter(); 
                 }
             }
         },
