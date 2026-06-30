@@ -269,8 +269,8 @@ cableTransitionNode.buildType = prov(() => {
                 var neighbor = this.nearby(i);
                 if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
                     if (this.power.graph != neighbor.power.graph) {
-                        // Blend the two graphs together seamlessly
-                        this.power.graph.merge(neighbor.power.graph);
+                        // FIX: Changed .merge() to .addGraph()
+                        this.power.graph.addGraph(neighbor.power.graph);
                     }
                 }
             }
