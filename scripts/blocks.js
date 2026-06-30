@@ -242,7 +242,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
-// FIXED: Wrapped inside prov() to fix the invisibility bug completely
 cableTransitionNode.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         
@@ -260,6 +259,22 @@ cableTransitionNode.buildType = prov(() => {
             return list;
         },
 
+        // FORCED MERGE FIX: Smoothly forces the engine's power graph to blend with standard blocks
+        onProximityUpdate: function() {
+            this.super$onProximityUpdate();
+            
+            // Forcefully merge graphs with any directly adjacent valid power blocks
+            for (var i = 0; i < 4; i++) {
+                var neighbor = this.nearby(i);
+                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
+                    if (this.power.graph != neighbor.power.graph) {
+                        // Blend the two graphs together seamlessly
+                        this.power.graph.merge(neighbor.power.graph);
+                    }
+                }
+            }
+        },
+
         draw: function() {
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
@@ -272,7 +287,7 @@ cableTransitionNode.buildType = prov(() => {
             }
         },
 
-        // Prevents regular base lasers from linking directly onto a cable tile
+        // Prevents regular base lasers from linking directly onto a pure cable tile
         canConnectTo: function(other) {
             return other.block !== waterCable && this.super$canConnectTo(other); 
         }
