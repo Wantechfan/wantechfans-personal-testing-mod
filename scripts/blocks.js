@@ -35,10 +35,12 @@ const waterCable = extend(Block, "water-power-cable", {
 });
 
 waterCable.buildType = prov(() => {
-    return extend(Building, waterCable, {
+    // FIX: Removed "waterCable" parameter from the extend function
+    return extend(Building, {
+        
         // Initialize our custom energy data type
         underwaterPower: 0,
-        maxPower: 1000, // Internal buffer limit per cable tile
+        maxPower: 1000,
 
         updateTile: function() {
             this.super$updateTile();
