@@ -11,12 +11,16 @@ const waterCable = extend(Block, "water-power-cable", {
 
     load: function() {
         this.super$load();
+        
+        // Base Textures
         this.singleRegion = Core.atlas.find(this.name + "-single");
         this.endRegion = Core.atlas.find(this.name + "-end");
         this.straightRegion = Core.atlas.find(this.name + "-straight");
         this.bendRegion = Core.atlas.find(this.name + "-bend");
         this.tRegion = Core.atlas.find(this.name + "-t");
         this.fourWayRegion = Core.atlas.find(this.name + "-four");
+
+        // Glow Textures
         this.singleGlow = Core.atlas.find(this.name + "-single-glow");
         this.endGlow = Core.atlas.find(this.name + "-end-glow");
         this.straightGlow = Core.atlas.find(this.name + "-straight-glow");
@@ -27,6 +31,7 @@ const waterCable = extend(Block, "water-power-cable", {
 
     setBars: function() {
         this.super$setBars();
+        // FIXED: Correctly added custom bar initialization
         this.addBar("underwater-power", func(b => 
             new Bar(
                 prov(() => "Power (Underwater)"), 
@@ -98,6 +103,7 @@ waterCable.buildType = prov(() => {
         updateTile: function() {
             this.super$updateTile();
 
+            // Equalize power with neighboring underwater blocks smoothly
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
@@ -204,18 +210,17 @@ cableTransitionNode.buildType = prov(() => {
         updateTile: function() {
             this.super$updateTile();
 
-            // Safely interface with the attached vanilla power grid graph
+            // Transfer energy out of the vanilla power grid graph into our underwater system
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
                 
-                // 1. Charge the buffer if the vanilla network is fully satisfied (Satisfaction >= 1.0)
+                // If grid satisfaction is clean, fill our buffer
                 if (graph.getSatisfaction() >= 1.0 && this.underwaterPower < this.maxPower) {
-                    // Pull 10 power units per second scaled to delta time
                     this.underwaterPower = Math.min(this.underwaterPower + (10 * Time.delta), this.maxPower);
                 }
             }
 
-            // Balanced sharing mechanism across adjacent water lines
+            // Share our collected power over to adjacent underwater cables
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
@@ -250,6 +255,7 @@ cableTransitionNode.buildType = prov(() => {
             }
         },
 
+        // Block standard visual lasers from bridging directly to an un-noded water piece
         canConnectTo: function(other) {
             return other.block !== waterCable && this.super$canConnectTo(other); 
         }
