@@ -25,7 +25,6 @@ const waterCable = extend(Block, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
-    // FIXED: Correct implementation using the block's native addBar function signature
     setBars: function() {
         this.super$setBars();
         this.addBar("underwater-power", func(b => 
@@ -185,7 +184,6 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
         this.glowRegion = Core.atlas.find(this.name + "-glow");
     },
 
-    // FIXED: Native addBar assignment structure
     setBars: function() {
         this.super$setBars();
         this.addBar("underwater-power", func(b => 
@@ -204,25 +202,35 @@ cableTransitionNode.buildType = prov(() => {
         maxPower: 2000,
 
         updateTile: function() {
-            this.super$updateTile();
-
+            // FIXED: Process conversion logic before running super$updateTile()
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
-                var balance = graph.getPowerBalance();
                 
-                // FIXED: Replaced non-existent edelta() function reference with native Time.delta
-                if (balance > 0 && this.underwaterPower < this.maxPower) {
-                    var potentialSiphon = Math.min(balance * Time.delta, this.maxPower - this.underwaterPower);
+                // Get current generation vs consumption rate directly from graph pools
+                var powerProduction = graph.getPowerProduction();
+                var powerNeeded = graph.getPowerNeeded();
+                var netBalance = powerProduction - powerNeeded;
+                
+                if (netBalance > 0 && this.underwaterPower < this.maxPower) {
+                    // Pull surplus generation smoothly scaled by frame rate delta
+                    var potentialSiphon = Math.min(netBalance * Time.delta, this.maxPower - this.underwaterPower);
                     this.underwaterPower += potentialSiphon;
+                    
+                    // Artificially subtract this power consumption from the vanilla graph network
                     graph.transferPower(-potentialSiphon); 
                 } 
-                else if (balance < 0 && this.underwaterPower > 0) {
-                    var boost = Math.min(this.underwaterPower, Math.abs(balance) * Time.delta);
+                else if (netBalance < 0 && this.underwaterPower > 0) {
+                    // Push battery buffer storage back to cover brownouts
+                    var boost = Math.min(this.underwaterPower, Math.abs(netBalance) * Time.delta);
                     this.underwaterPower -= boost;
                     graph.transferPower(boost); 
                 }
             }
 
+            // Run base update logic safely
+            this.super$updateTile();
+
+            // Distribute power among adjacent underwater assets
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
