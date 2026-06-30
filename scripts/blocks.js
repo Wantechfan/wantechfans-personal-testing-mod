@@ -169,7 +169,7 @@ waterCable.buildType = prov(() => {
 
 waterCable.category = Category.power;
 waterCable.buildVisibility = BuildVisibility.shown;
-waterCable.requirements = ItemStack.with(Items.copper, 5, Items.lead, 3);
+waterCable.requirements = ItemStack.with(Items.copper, 1, Items.lead, 1);
 
 
 const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
@@ -202,35 +202,35 @@ cableTransitionNode.buildType = prov(() => {
         maxPower: 2000,
 
         updateTile: function() {
-            // FIXED: Process conversion logic before running super$updateTile()
+            this.super$updateTile();
+
+            // FIXED: Clean network power extraction without using the broken transferPower wrapper
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
-                
-                // Get current generation vs consumption rate directly from graph pools
-                var powerProduction = graph.getPowerProduction();
-                var powerNeeded = graph.getPowerNeeded();
-                var netBalance = powerProduction - powerNeeded;
+                var netBalance = graph.getPowerProduction() - graph.getPowerNeeded();
                 
                 if (netBalance > 0 && this.underwaterPower < this.maxPower) {
-                    // Pull surplus generation smoothly scaled by frame rate delta
-                    var potentialSiphon = Math.min(netBalance * Time.delta, this.maxPower - this.underwaterPower);
-                    this.underwaterPower += potentialSiphon;
-                    
-                    // Artificially subtract this power consumption from the vanilla graph network
-                    graph.transferPower(-potentialSiphon); 
+                    // Siphon a fraction of the net generation surplus over time
+                    var amount = Math.min(netBalance * Time.delta, this.maxPower - this.underwaterPower);
+                    this.underwaterPower += amount;
                 } 
                 else if (netBalance < 0 && this.underwaterPower > 0) {
-                    // Push battery buffer storage back to cover brownouts
-                    var boost = Math.min(this.underwaterPower, Math.abs(netBalance) * Time.delta);
-                    this.underwaterPower -= boost;
-                    graph.transferPower(boost); 
+                    // If network has a shortage and we have data power, drain batteries to compensate
+                    var totalShortage = Math.abs(netBalance) * Time.delta;
+                    var dynamicBoost = Math.min(this.underwaterPower, totalShortage);
+                    
+                    if (graph.batteries.size > 0) {
+                        var share = dynamicBoost / graph.batteries.size;
+                        for (var i = 0; i < graph.batteries.size; i++) {
+                            var bat = graph.batteries.get(i);
+                            bat.energy = Math.min(bat.energy + share, bat.block.consPower.capacity);
+                        }
+                        this.underwaterPower -= dynamicBoost;
+                    }
                 }
             }
 
-            // Run base update logic safely
-            this.super$updateTile();
-
-            // Distribute power among adjacent underwater assets
+            // Distribute power to neighboring water cable entities
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
