@@ -177,6 +177,9 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     health: 120,
     maxNodes: 10,       
     laserRange: 6,
+    // EXPLICIT CONFIG: Telling the map engine that this block participates in production/consumption tasks
+    outputsPower: true,
+    consumesPower: true,
 
     load: function() {
         this.super$load();
@@ -200,37 +203,49 @@ cableTransitionNode.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         underwaterPower: 0,
         maxPower: 2000,
+        currentOp: 0, // State machine tracker: 1 = Drawing power, -1 = Distributing power
+
+        // NEW: Tell the engine graph to consume excess energy when grid is stable
+        getPowerRequired: function() {
+            if (this.power != null && this.power.graph != null && this.underwaterPower < this.maxPower) {
+                var graph = this.power.graph;
+                if (graph.getSatisfaction() >= 1.0 && graph.getPowerProduction() > 0) {
+                    return 30; // Ask for 30 units/sec from the network
+                }
+            }
+            return 0;
+        },
+
+        // NEW: Provide power to the local network directly if there's a shortage
+        getPowerProduction: function() {
+            if (this.power != null && this.power.graph != null && this.underwaterPower > 0) {
+                if (this.power.graph.getSatisfaction() < 1.0) {
+                    return Math.min(this.underwaterPower / Time.delta, 40); // Generate up to 40 units/sec
+                }
+            }
+            return 0;
+        },
 
         updateTile: function() {
             this.super$updateTile();
 
-            // FIXED: Using network satisfaction instead of net balance to bypass the 0-demand issue
+            // Handle the internal buffer tracking based on engine calculation choices
             if (this.power != null && this.power.graph != null) {
                 var graph = this.power.graph;
                 
-                // If the connected network has functional generators and power is fully stable
-                if (graph.producers.size > 0 && graph.getSatisfaction() >= 1.0) {
-                    if (this.underwaterPower < this.maxPower) {
-                        // Siphon up to 15 energy units per second scaled by delta
-                        this.underwaterPower += Math.min(15 * Time.delta, this.maxPower - this.underwaterPower);
-                    }
+                if (graph.getSatisfaction() >= 1.0 && this.underwaterPower < this.maxPower && graph.getPowerProduction() > 0) {
+                    // Siphon power into our custom internal array tracking
+                    var taken = 30 * Time.delta * graph.getSatisfaction();
+                    this.underwaterPower = Math.min(this.underwaterPower + taken, this.maxPower);
                 } 
-                // If the main grid experiences a power shortage (brownout), feedback our stored energy
                 else if (graph.getSatisfaction() < 1.0 && this.underwaterPower > 0) {
-                    var drainAmount = Math.min(this.underwaterPower, 20 * Time.delta);
-                    
-                    if (graph.batteries.size > 0) {
-                        var share = drainAmount / graph.batteries.size;
-                        for (var i = 0; i < graph.batteries.size; i++) {
-                            var bat = graph.batteries.get(i);
-                            bat.energy = Math.min(bat.energy + share, bat.block.consPower.capacity);
-                        }
-                        this.underwaterPower -= drainAmount;
-                    }
+                    // Drain buffer storage to help handle brownouts
+                    var provided = Math.min(40 * Time.delta, this.underwaterPower);
+                    this.underwaterPower -= provided;
                 }
             }
 
-            // Distribute power to neighboring water cable pieces
+            // Standard chain distribution down adjacent cable lines
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
