@@ -108,6 +108,11 @@ waterCable.buildType = prov(() => {
             return list;
         },
 
+        // NEW FIX: Prevents any external power nodes from establishing node-to-node links with this cable
+        canConnectTo: function(other) {
+            return other.block === waterCable || other.block === cableTransitionNode;
+        },
+
         draw: function() {
             var mask = 0;
             for (var i = 0; i < 4; i++) {
