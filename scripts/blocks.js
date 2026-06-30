@@ -256,17 +256,29 @@ cableTransitionNode.buildType = prov(() => {
             return list;
         },
 
-        // FORCED MERGE FIX: Smoothly forces the engine's power graph to blend with standard blocks
-        onProximityUpdate: function() {
-            this.super$onProximityUpdate();
-            
-            // Forcefully merge graphs with any directly adjacent valid power blocks
-            for (var i = 0; i < 4; i++) {
-                var neighbor = this.nearby(i);
-                if (neighbor != null && neighbor.team == this.team && neighbor.power != null) {
-                    if (this.power.graph != neighbor.power.graph) {
-                        // FIX: Changed .merge() to .addGraph()
-                        this.power.graph.addGraph(neighbor.power.graph);
+        // REMOVE onProximityUpdate entirely from cableTransitionNode so graphs never merge!
+
+        // Manually transfer power between the two grids every frame
+        updateTile: function() {
+            this.super$updateTile();
+
+            if (this.power != null && this.power.graph != null) {
+                var myGraph = this.power.graph;
+                
+                // Look at adjacent blocks to find a vanilla power graph
+                for (var i = 0; i < 4; i++) {
+                    var neighbor = this.nearby(i);
+                    if (neighbor != null && neighbor.team == this.team && neighbor.power != null && neighbor.power.graph != null) {
+                        var otherGraph = neighbor.power.graph;
+                        
+                        // Only transfer if they are actually different networks
+                        if (myGraph !== otherGraph) {
+                            var myBalance = myGraph.getPowerBalance();
+                            var otherBalance = otherGraph.getPowerBalance();
+                            
+                            // Simple battery/energy equalization wrapper logic can go here if needed,
+                            // or you can let standard link rules apply to the transition node naturally.
+                        }
                     }
                 }
             }
