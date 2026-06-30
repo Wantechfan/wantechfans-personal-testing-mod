@@ -242,6 +242,7 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
     }
 });
 
+// UPDATED: cableTransitionNode setup to correctly render lasers
 cableTransitionNode.buildType = prov(() => {
     return extend(PowerNode.PowerNodeBuild, cableTransitionNode, {
         
@@ -275,7 +276,12 @@ cableTransitionNode.buildType = prov(() => {
             }
         },
 
+        // FIXED: Added super$draw() call to fix the missing laser lines
         draw: function() {
+            // This forces the engine to render all active laser lines connected to this node
+            this.super$draw(); 
+
+            // Draws your custom base texture over the standard texture if needed
             Draw.rect(cableTransitionNode.baseRegion, this.x, this.y);
 
             if (this.power != null && this.power.graph != null && (this.power.graph.getPowerBalance() > 0 || this.power.graph.getLastPowerStored() > 0)) {
