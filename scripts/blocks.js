@@ -28,12 +28,13 @@ const waterCable = extend(Block, "water-power-cable", {
         this.fourWayGlow = Core.atlas.find(this.name + "-four-glow");
     },
 
-    // FIXED: Adds a custom UI bar so you can see the underwater power stats when clicking the block!
+    // CORRECTED METHOD FOR SETTING BARS
     setBars: function() {
         this.super$setBars();
-        this.addBar("underwater-power", prov(b => 
+        // Uses the engine's explicit Bar object wrapper mapping
+        this.bars.add("underwater-power", func(b => 
             new Bar(
-                prov(() => Core.bundle.get("bar.power", "Power") + " (Underwater)"), 
+                prov(() => "Power (Underwater)"), 
                 prov(() => Color.yellow), 
                 floatp(() => b.underwaterPower / b.maxPower)
             )
@@ -105,7 +106,6 @@ waterCable.buildType = prov(() => {
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
-                // FIXED: Explicitly check for block types to find valid neighbors
                 if (n != null && n.team == this.team && (n.block === waterCable || n.block === cableTransitionNode)) {
                     targets.add(n);
                 }
@@ -129,7 +129,6 @@ waterCable.buildType = prov(() => {
             var mask = 0;
             for (var i = 0; i < 4; i++) {
                 var neighbor = this.nearby(i);
-                // FIXED: Checking explicitly by block types ensures the mask textures update immediately
                 if (neighbor != null && (neighbor.block === waterCable || neighbor.block === cableTransitionNode)) {
                     mask |= (1 << i);
                 }
@@ -158,7 +157,6 @@ waterCable.buildType = prov(() => {
 
             Draw.rect(region, this.x, this.y, rotation);
 
-            // Glowing indicator lines light up based on data level
             if (this.underwaterPower > 0.1) {
                 Draw.color(Color.yellow); 
                 Draw.blend(Blending.additive); 
@@ -191,12 +189,12 @@ const cableTransitionNode = extend(PowerNode, "cable-transition-node", {
         this.glowRegion = Core.atlas.find(this.name + "-glow");
     },
 
-    // FIXED: Adds a custom UI bar to track the transition block's converted pool too
+    // CORRECTED BAR INITIALIZATION FOR THE NODE
     setBars: function() {
         this.super$setBars();
-        this.addBar("underwater-power", prov(b => 
+        this.bars.add("underwater-power", func(b => 
             new Bar(
-                prov(() => Core.bundle.get("bar.power", "Power") + " (Underwater Buffer)"), 
+                prov(() => "Power (Underwater Buffer)"), 
                 prov(() => Color.orange), 
                 floatp(() => b.underwaterPower / b.maxPower)
             )
@@ -216,21 +214,19 @@ cableTransitionNode.buildType = prov(() => {
                 var graph = this.power.graph;
                 var balance = graph.getPowerBalance();
                 
-                // If vanilla network has excess energy, convert it to underwater storage
+                // FIXED: Lowercase edelta() calculation method
                 if (balance > 0 && this.underwaterPower < this.maxPower) {
                     var potentialSiphon = Math.min(balance * edelta(), this.maxPower - this.underwaterPower);
                     this.underwaterPower += potentialSiphon;
-                    graph.transferPower(-potentialSiphon); // Drain it out of the vanilla network grid smoothly
+                    graph.transferPower(-potentialSiphon); 
                 } 
-                // If vanilla network needs power, feedback from our underwater lines
                 else if (balance < 0 && this.underwaterPower > 0) {
                     var boost = Math.min(this.underwaterPower, Math.abs(balance) * edelta());
                     this.underwaterPower -= boost;
-                    graph.transferPower(boost); // Feed power smoothly back into vanilla nodes
+                    graph.transferPower(boost); 
                 }
             }
 
-            // Distribute power explicitly into adjacent cables too
             var targets = new Seq();
             for (var i = 0; i < 4; i++) {
                 var n = this.nearby(i);
