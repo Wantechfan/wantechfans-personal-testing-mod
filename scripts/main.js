@@ -42,7 +42,7 @@ Events.on(ContentInitEvent, () => {
     });
 
     // 3. Define the planet's visual 3D mesh (what it looks like in space)
-    myPlanet.meshLoader = () => extend(HexSkyMesh, myPlanet, 6, 0.1, 0.2, 2, 
+    myPlanet.meshLoader = () => new HexSkyMesh(myPlanet, 6, 0.1, 0.2, 2, 
     Color.valueOf("5a8251"), 
     Color.valueOf("3a5e3b"), 
     Color.valueOf("2b422c")
