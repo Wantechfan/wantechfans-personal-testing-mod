@@ -42,11 +42,11 @@ Events.on(ContentInitEvent, () => {
     });
 
     // 3. Define the planet's visual 3D mesh (what it looks like in space)
-    myPlanet.meshLoader = () => extend(HexSkyMesh, [myPlanet, 6, 0.1, 0.2, 2, 
-        Color.valueOf("5a8251"), 
-        Color.valueOf("3a5e3b"), 
-        Color.valueOf("2b422c")
-    ]);
+    myPlanet.meshLoader = () => extend(HexSkyMesh, myPlanet, 6, 0.1, 0.2, 2, 
+    Color.valueOf("5a8251"), 
+    Color.valueOf("3a5e3b"), 
+    Color.valueOf("2b422c")
+    );
 
     // 4. Force register the content into the game's registry
     Vars.content.planets().add(myPlanet);
