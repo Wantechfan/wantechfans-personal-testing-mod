@@ -42,14 +42,10 @@ Events.on(ContentInitEvent, () => {
     });
 
     // 3. Define the planet's visual 3D mesh (what it looks like in space)
-    myPlanet.meshLoader = () => new HexSkyMesh(
-    myPlanet, // 1. The planet instance
-    6,        // 2. Mesh resolution/seed integer
-    Color.valueOf("5a8251"), // 3. Base color
-    Color.valueOf("3a5e3b"), // 4. Secondary color
-    Color.valueOf("2b422c")  // 5. Tertiary color
+    myPlanet.meshLoader = () => new MultiMesh(
+    new HexMesh(myPlanet, 6), // Base structural layout 
+    new HexMesh(myPlanet, 5)  // Secondary noise layer
     );
-
     // 4. Force register the content into the game's registry
     Vars.content.planets().add(myPlanet);
 });
