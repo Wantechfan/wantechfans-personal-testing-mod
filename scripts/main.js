@@ -27,7 +27,7 @@ Events.on(ContentInitEvent, () => {
 
     // 2. Instantiate the Planet class
     // Parameters: ("internal-name", parentPlanet, radius)
-    const myPlanet = extend(Planet, "my-planet", Planets.serpulo, 3, {
+    const myPlanet = extend(Planet, "my-planet", Planets.serpulo, 1, {
         generator: myGenerator,
         localizedName: "Test plenet",
         accessible: true, // Makes it playable
