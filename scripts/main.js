@@ -10,6 +10,47 @@ const bossMusic = Vars.tree.loadMusic("racethesun");
 // 1. Declare a persistent global flag outside the event callback scope
 // This value is preserved across multiple ClientLoadEvent executions
 require("blocks");
+// Wait for the game to initialize content before registering the planet
+Events.on(ContentInitEvent, () => {
+    
+    // 1. Define a custom map generator (determines sector geography)
+    const myGenerator = extend(PlanetGenerator, {
+        // Basic noise-based height generation
+        getHeight(position) {
+            return Mathf.noise(position.x, position.y, 2, 0.55);
+        },
+        // Basic color mapping for the map preview
+        getColor(position) {
+            return Color.valueOf("5a8251"); // Mossy green
+        }
+    });
+
+    // 2. Instantiate the Planet class
+    // Parameters: ("internal-name", parentPlanet, radius)
+    const myPlanet = extend(Planet, "my-planet", Planets.serpulo, 3, {
+        generator: myGenerator,
+        localizedName: "Test plenet",
+        accessible: true, // Makes it playable
+        alwaysUnlocked: true,
+        visible: true,
+        atmosphereColor: Color.valueOf("4b729f"),
+        atmosphereRad: 0.25,
+        startSector: 15,
+        
+        // Items allowed on this planet
+        itemWhitelist: Seq.with(Items.copper, Items.lead, Items.silicon) 
+    });
+
+    // 3. Define the planet's visual 3D mesh (what it looks like in space)
+    myPlanet.meshLoader = () => extend(HexSkyMesh, [myPlanet, 6, 0.1, 0.2, 2, 
+        Color.valueOf("5a8251"), 
+        Color.valueOf("3a5e3b"), 
+        Color.valueOf("2b422c")
+    ]);
+
+    // 4. Force register the content into the game's registry
+    Vars.content.planets().add(myPlanet);
+});
 Events.on(ClientLoadEvent, () => {
     Log.info("Блять!");
     // Safely fetch content now that ClientLoadEvent has fired
