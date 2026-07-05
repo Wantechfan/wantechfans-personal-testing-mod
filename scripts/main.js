@@ -18,7 +18,7 @@ Events.on(ContentInitEvent, () => {
         // Basic noise-based height generation
         getHeight(position) {
             return Math.abs(Math.sin(position.x * 2.0) * Math.cos(position.y * 2.0)) * 0.3;
-        }
+        },
         // Basic color mapping for the map preview
         getColor(position) {
             return Color.valueOf("5a8251"); // Mossy green
