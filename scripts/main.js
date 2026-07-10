@@ -38,9 +38,6 @@ Events.on(ContentInitEvent, () => {
             )
         );
     };
-
-    // Jenerator
-    teknet.generator = new SerpuloPlanetGenerator(); 
     
     // Atmosfahh
     teknet.hasAtmosphere = true;
