@@ -11,48 +11,62 @@ require("blocks")
 
 // Plenet
 Events.on(ContentInitEvent, () => {
+    // BLYAAAAAAAAAAT
+    Log.info("Блять!");
     // Obj
-    const myPlanet = new Planet("my-green-planet", Planets.sun, 1.5, 3);
+    const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
     
     // Meshh
-    myPlanet.meshLoader = () => {
+    teknet.meshLoader = () => {
         return new MultiMesh(
-            new NoiseMesh(myPlanet, 0, 2, 2.2, 3, 0.6, 0.45, 0.5, 
-                Color.valueOf("3a8e47"), // Primary Dark Green/Forest Base
-                Color.valueOf("5cb85c"), // Secondary Bright Moss Green
-                3, 2.2, 1.2, 0.8)
+            // Meshes
+            new HexMesh(teknet, 6), 
+            new NoiseMesh(teknet, 
+                15,          // I HAS A SEED ITZ 15
+                5,           // I HAS A OCTAVE ITZ 5
+                0.7,         // I HAS A PERSISTENCE ITZ 0.7
+                0.6,         // I HAS A SCALE ITZ 0.6
+                0.55,        // I HAS A MAGNITUDE ITZ 0.55
+                0.3,         // I HAS A MIN ITZ 0.3
+                0.8,         // I HAS A MAX ITZ 0.8
+                Color.valueOf("3a8e47"),
+                Color.valueOf("5cb85c"), // These mfs are just colors
+                4,           // I HAS A DETAILS ITZ 4
+                1.5,         // I HAS A DISTORT ITZ 1.5
+                1.1,         // I HAS A BLEND ITZ 1.1
+                0.7          // I HAS A SEEDOFFSET ITZ 0.7
+            )
         );
     };
 
     // Jenerator
-    myPlanet.generator = new SerpuloPlanetGenerator(); 
+    teknet.generator = new SerpuloPlanetGenerator(); 
     
     // Atmosfahh
-    myPlanet.atmosphereColor = Color.valueOf("2dbd53"); 
-    myPlanet.atmosphereRadIn = 0.02;
-    myPlanet.atmosphereRadOut = 0.28;
+    teknet.hasAtmosphere = true;
+    teknet.atmosphereColor = Color.valueOf("2dbd53"); 
+    teknet.atmosphereRadIn = 0.02;
+    teknet.atmosphereRadOut = 0.28;
 
     // Orbit
-    myPlanet.orbitRadius = Planets.serpulo.orbitRadius - 0.6;
-    myPlanet.orbitTime = Planets.serpulo.orbitTime * 0.85;
+    teknet.orbitRadius = Planets.serpulo.orbitRadius - 0.6;
+    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;
     
     // Bullshits
-    myPlanet.radius = 2.2; 
-    myPlanet.accessible = true;
-    myPlanet.visible = true;
-    myPlanet.sectorSeed = 1337;
-    myPlanet.startSector = 0;
-    myPlanet.alwaysUnlocked = true;
+    teknet.radius = 2.2; 
+    teknet.accessible = true;
+    teknet.visible = true;
+    teknet.sectorSeed = 1337;
+    teknet.startSector = 0;
+    teknet.alwaysUnlocked = true;
     
-    myPlanet.ruleSetter = rules => {
+    teknet.ruleSetter = rules => {
         rules.waveTimer = true;
         rules.waves = true;
     };
 });
 
 Events.on(ClientLoadEvent, () => {
-    // BLYAAAAAAAAAAT
-    Log.info("Блять!");
     // Yet another constants
     const soundManager = Vars.control.sound;
     const scathe = Blocks.scathe;
