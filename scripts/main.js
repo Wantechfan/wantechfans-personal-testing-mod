@@ -19,31 +19,31 @@ Events.on(ContentInitEvent, () => {
     // Meshh
     teknet.meshLoader = () => {
         return new MultiMesh(
-            // Meshes
-            new HexMesh(teknet, 6), 
+            new HexMesh(teknet, 6),
             new NoiseMesh(teknet, 
-                15,          // I HAS A SEED ITZ 15
-                5,           // I HAS A OCTAVE ITZ 5
-                0.7,         // I HAS A PERSISTENCE ITZ 0.7
-                0.6,         // I HAS A SCALE ITZ 0.6
-                0.55,        // I HAS A MAGNITUDE ITZ 0.55
-                0.3,         // I HAS A MIN ITZ 0.3
-                0.8,         // I HAS A MAX ITZ 0.8
-                Color.valueOf("3a8e47"),
-                Color.valueOf("5cb85c"), // These mfs are just colors
-                4,           // I HAS A DETAILS ITZ 4
-                1.5,         // I HAS A DISTORT ITZ 1.5
-                1.1,         // I HAS A BLEND ITZ 1.1
-                0.7          // I HAS A SEEDOFFSET ITZ 0.7
+                15,          // Seed
+                5,           // Octaves (High detail)
+                0.7,         // Persistence (Makes features sharp/jagged)
+                0.6,         // Scale
+                0.55,        // Magnitude
+                0.3,         // Min
+                0.8,         // Max
+                Color.valueOf("3a8e47"), // Primary Dark Green/Forest Base
+                Color.valueOf("5cb85c"), // Secondary Bright Moss Green
+                4,           // Details
+                1.5,         // Distort
+                1.1,         // Blend
+                0.7          // Seed offset
             )
         );
     };
+    teknet.mesh = teknet.meshLoader();
 
     // Jenerator
     teknet.generator = extend(PlanetGenerator, {
         generateSector: function(sector) {},
         getHeight: function(position) { return 0; },
-        getColor: function(position) { return Color.valueOf("4caf50"); }
+        getColor: function(position) { return Color.valueOf("3a8e47"); }
     });
     
     // Atmosfahh
