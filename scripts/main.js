@@ -9,33 +9,42 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
 require("blocks")
 
+// Plenet
 Events.on(ContentInitEvent, () => {
-    const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
+    // Obj
+    const myPlanet = new Planet("my-green-planet", Planets.sun, 1.5, 3);
     
-    // Atmosphere
-    teknet.atmosphereColor = Color.valueOf("2dbd53");
-    teknet.atmosphereRadIn = -0.01;
-    teknet.atmosphereRadOut = 0.3;
+    // Meshh
+    myPlanet.meshLoader = () => {
+        return new MultiMesh(
+            new NoiseMesh(myPlanet, 0, 2, 2.2, 3, 0.6, 0.45, 0.5, 
+                Color.valueOf("3a8e47"), // Primary Dark Green/Forest Base
+                Color.valueOf("5cb85c"), // Secondary Bright Moss Green
+                3, 2.2, 1.2, 0.8)
+        );
+    };
 
-    // Mesh loder i jenerator
-    teknet.meshLoader = () => new HexMesh(teknet, 6);
-    const customGen = new SerpuloPlanetGenerator();
-    customGen.cubemap = null;
-    teknet.generator = customGen;
+    // Jenerator
+    myPlanet.generator = new SerpuloPlanetGenerator(); 
+    
+    // Atmosfahh
+    myPlanet.atmosphereColor = Color.valueOf("2dbd53"); 
+    myPlanet.atmosphereRadIn = 0.02;
+    myPlanet.atmosphereRadOut = 0.28;
 
     // Orbit
-    teknet.orbitRadius = Planets.serpulo.orbitRadius - 0.4;
-    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;
+    myPlanet.orbitRadius = Planets.serpulo.orbitRadius - 0.6;
+    myPlanet.orbitTime = Planets.serpulo.orbitTime * 0.85;
     
     // Bullshits
-    teknet.radius = 2.2; 
-    teknet.accessible = true;
-    teknet.visible = true;
-    teknet.sectorSeed = 1337;
-    teknet.startSector = 0;
-    teknet.alwaysUnlocked = true;
+    myPlanet.radius = 2.2; 
+    myPlanet.accessible = true;
+    myPlanet.visible = true;
+    myPlanet.sectorSeed = 1337;
+    myPlanet.startSector = 0;
+    myPlanet.alwaysUnlocked = true;
     
-    teknet.ruleSetter = rules => {
+    myPlanet.ruleSetter = rules => {
         rules.waveTimer = true;
         rules.waves = true;
     };
