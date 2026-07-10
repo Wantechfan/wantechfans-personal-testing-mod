@@ -11,45 +11,34 @@ require("blocks")
 
 // Planet
 Events.on(ContentInitEvent, () => {
-    // Planet generator
-    const myGenerator = extend(PlanetGenerator, {
-        // Noise
-        getHeight(position) {
-            return Math.abs(Math.sin(position.x * 2.0) * Math.cos(position.y * 2.0)) * 0.3;
-        },
-        // Color - Mossy green
-        getColor(position) {
-            return Color.valueOf("5a8251"); 
-        }
-    });
+    const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
 
-    // Planet class
-    const myPlanet = extend(Planet, "my-planet", Planets.serpulo, 1, {
-        generator: myGenerator,
-        localizedName: "Test planet",
-        accessible: true, // Makes it playable
-        alwaysUnlocked: true,
-        visible: true,
-        atmosphereColor: Color.valueOf("4b729f"),
-        atmosphereRad: 0.25,
-        startSector: 15,
-        clearSectorOnLoss: true,
-        allowSectorInvasion: false,
-        allowLaunchLoadout: true,
-        itemWhitelist: Seq.with() // Keep blank or populate with items
-    });
-
-    // Planet's mesh
-    myPlanet.meshLoader = () => new MultiMesh(
-        new HexMesh(myPlanet, 6), // Base structural layout 
-        new HexMesh(myPlanet, 5)  // Secondary noise layer
-    );
-
-    // Required for sector generation and playability
-    myPlanet.sectorfilter = new Seq();
-
-    // Add planet
-    Vars.content.planets().add(myPlanet);
+    // Mesh structur
+    teknet.meshLoader = () => new HexMesh(teknet, 6);
+    teknet.generator = new SerpuloPlanetGenerator();    
+    
+    // Screw Serpulo orbit imma head into the sun
+    teknet.orbitRadius = Planets.serpulo.orbitRadius - 0.4;
+    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;    // Closer orbits revolve faster
+    
+    // Rav
+    teknet.radius = 2.2; 
+    teknet.accessible = true;
+    teknet.visible = true;
+    
+    // Atmohfir
+    teknet.atmosphereColor = Color.valueOf("2dbd53"); 
+    teknet.atmosphereRad = 0.25;
+        
+    // Whatever tf is this
+    teknet.sectorSeed = 1337;
+    teknet.startSector = 0;
+    teknet.alwaysUnlocked = true;
+    
+    teknet.ruleSetter = rules => {
+        rules.waveTimer = true;
+        rules.waves = true;
+    };
 });
 
 Events.on(ClientLoadEvent, () => {
