@@ -40,7 +40,11 @@ Events.on(ContentInitEvent, () => {
     };
 
     // Jenerator
-    teknet.generator = new PlanetGenerator(); 
+    teknet.generator = extend(PlanetGenerator, {
+        generateSector: function(sector) {},
+        getHeight: function(position) { return 0; },
+        getColor: function(position) { return Color.valueOf("4caf50"); }
+    });
     
     // Atmosfahh
     teknet.hasAtmosphere = true;
