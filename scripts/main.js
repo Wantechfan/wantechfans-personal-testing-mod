@@ -28,7 +28,7 @@ Events.on(ContentInitEvent, () => {
     
     // Atmohfir
     teknet.atmosphereColor = Color.valueOf("2dbd53"); 
-    teknet.atmosphereRad = 0.25;
+    teknet.atmosphereRadius = 0.25;
         
     // Whatever tf is this
     teknet.sectorSeed = 1337;
