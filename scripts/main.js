@@ -1,4 +1,3 @@
-// This is a Mindustry mod script
 // Music constants and blocks
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
@@ -22,8 +21,8 @@ Events.on(ContentInitEvent, () => {
             new HexMesh(teknet, 6),
             new NoiseMesh(teknet, 
                 15,          // Seed
-                5,           // Octaves (High detail)
-                0.7,         // Persistence (Makes features sharp/jagged)
+                5,           // Octaves (High value = sharp, detailed ridges)
+                0.7,         // Persistence (Makes features sharp/jagged like Asthosus)
                 0.6,         // Scale
                 0.55,        // Magnitude
                 0.3,         // Min
@@ -37,13 +36,14 @@ Events.on(ContentInitEvent, () => {
             )
         );
     };
-    teknet.mesh = teknet.meshLoader();
 
     // Jenerator
     teknet.generator = extend(PlanetGenerator, {
         generateSector: function(sector) {},
         getHeight: function(position) { return 0; },
-        getColor: function(position) { return Color.valueOf("3a8e47"); }
+        getColor: function(position) { 
+            return Color.valueOf("3a8e47"); 
+        } 
     });
     
     // Atmosfahh
