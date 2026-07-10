@@ -38,6 +38,9 @@ Events.on(ContentInitEvent, () => {
             )
         );
     };
+
+    // Jenerator
+    teknet.generator = new PlanetGenerator(); 
     
     // Atmosfahh
     teknet.hasAtmosphere = true;
