@@ -1,92 +1,89 @@
-// Keep music loading here as it's usually safe, or move inside if needed
-const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3");
-const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1");
-const darkMusic3 = Vars.tree.loadMusic("winterWind");
-const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano");
-const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2");
-const ambientMusic3 = Vars.tree.loadMusic("marimba");
-const bossMusic = Vars.tree.loadMusic("racethesun");
+// This is a Mindustry mod script
+// Music constants and blocks
+const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
+const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
+const darkMusic3 = Vars.tree.loadMusic("winterWind")
+const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano")
+const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2")
+const ambientMusic3 = Vars.tree.loadMusic("marimba")
+const bossMusic = Vars.tree.loadMusic("racethesun")
+require("blocks")
 
-// 1. Declare a persistent global flag outside the event callback scope
-// This value is preserved across multiple ClientLoadEvent executions
-require("blocks");
-// Wait for the game to initialize content before registering the planet
+// Planet
 Events.on(ContentInitEvent, () => {
-    
-    // 1. Define a custom map generator (determines sector geography)
+    // Planet generator
     const myGenerator = extend(PlanetGenerator, {
-        // Basic noise-based height generation
+        // Noise
         getHeight(position) {
             return Math.abs(Math.sin(position.x * 2.0) * Math.cos(position.y * 2.0)) * 0.3;
         },
-        // Basic color mapping for the map preview
+        // Color - Mossy green
         getColor(position) {
-            return Color.valueOf("5a8251"); // Mossy green
+            return Color.valueOf("5a8251"); 
         }
     });
 
-    // 2. Instantiate the Planet class
-    // Parameters: ("internal-name", parentPlanet, radius)
+    // Planet class
     const myPlanet = extend(Planet, "my-planet", Planets.serpulo, 1, {
         generator: myGenerator,
-        localizedName: "Test plenet",
+        localizedName: "Test planet",
         accessible: true, // Makes it playable
         alwaysUnlocked: true,
         visible: true,
         atmosphereColor: Color.valueOf("4b729f"),
         atmosphereRad: 0.25,
         startSector: 15,
-        
-        // Items allowed on this planet
-        itemWhitelist: Seq.with(Items.copper, Items.lead, Items.silicon) 
+        clearSectorOnLoss: true,
+        allowSectorInvasion: false,
+        allowLaunchLoadout: true,
+        itemWhitelist: Seq.with() // Keep blank or populate with items
     });
 
-    // 3. Define the planet's visual 3D mesh (what it looks like in space)
+    // Planet's mesh
     myPlanet.meshLoader = () => new MultiMesh(
-    new HexMesh(myPlanet, 6), // Base structural layout 
-    new HexMesh(myPlanet, 5)  // Secondary noise layer
+        new HexMesh(myPlanet, 6), // Base structural layout 
+        new HexMesh(myPlanet, 5)  // Secondary noise layer
     );
-    // 4. Force register the content into the game's registry
+
+    // Required for sector generation and playability
+    myPlanet.sectorfilter = new Seq();
+
+    // Add planet
     Vars.content.planets().add(myPlanet);
 });
+
 Events.on(ClientLoadEvent, () => {
+    // BLYAAAAAAAAAAT
     Log.info("Блять!");
-    // Safely fetch content now that ClientLoadEvent has fired
+    // Yet another constants
     const soundManager = Vars.control.sound;
     const scathe = Blocks.scathe;
     const scatheCarbide = Blocks.scathe.ammoTypes.get(Items.carbide).spawnUnit;
     const scathePhase = Blocks.scathe.ammoTypes.get(Items.phaseFabric).spawnUnit;
     const scatheSurge = Blocks.scathe.ammoTypes.get(Items.surgeAlloy).spawnUnit;
-    // Settings Configuration
+    // Mana 19 juta lapangan pekerjaannya?
     Vars.ui.settings.addCategory("Insyaallah akan terbuka 19 juta lapangan pekerjaan", Icon.settings, table => {
-    
-    // Helper function to create checkboxes manually since checkPref is strict
-    function addCustomCheck(title, key, defaultValue) {
-        // Create the checkbox and initialize its state based on saved settings
-        table.check(title, Core.settings.getBool(key, defaultValue), t => {
-            Core.settings.put(key, t);
-        }).left().row(); // Align left and move to the next row
-    }
+        // Chek'
+        function addCustomCheck(title, key, defaultValue) {
+            // Chek'box
+            table.check(title, Core.settings.getBool(key, defaultValue), t => {
+                Core.settings.put(key, t);
+            }).left().row(); // Align left and move to the next row
+        }
+        addCustomCheck("Epik Gyatthoven and Others Song", "epicMusics", false);
+        addCustomCheck("Scathe Have Seizures", "scatheCheat", false);
+        addCustomCheck("Verite and Mortar Have Serizures", "asthosusStuff", false);
+    });
 
-    // Now you can name them whatever you want!
-    addCustomCheck("Epik Gyatthoven and Others Song", "epicMusics", false);
-    addCustomCheck("Scathe Have Seizures", "scatheCheat", false);
-    addCustomCheck("Verite and Mortar Have Serizures", "asthosusStuff", false);
-    
-});
-
-
-
-    // Music Setup (Fixed .addAll)
+    // Music setting
     if (Core.settings.getBool("epicMusics", false)) {
         soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3);
         soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3);
         soundManager.bossMusic.add(bossMusic);
     }
 
-    // Scathe Cheat
+    // Scathe cheat
     if (Core.settings.getBool("scatheCheat", false) && scathe) {
-        // General Scathe
         scathe.fogRadiusMultiplier = 1;
         scathe.shootSound = Sounds.wind3;
         scathe.targetAir = true;
@@ -129,7 +126,7 @@ Events.on(ClientLoadEvent, () => {
         }
     }
 
-    // Asthosus Mod
+    // Asthosus
     if (Vars.mods.getMod("asthosus")) {
         if (Core.settings.getBool("asthosusStuff", false)) {
             const verite = Vars.content.block("asthosus-03c-18-verite");
