@@ -9,27 +9,28 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
 require("blocks")
 
-// Planet
 Events.on(ContentInitEvent, () => {
     const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
+    
+    // Atmosphere
+    teknet.atmosphereColor = Color.valueOf("2dbd53");
+    teknet.atmosphereRadIn = -0.01;
+    teknet.atmosphereRadOut = 0.3;
 
-    // Mesh structur
+    // Mesh loder i jenerator
     teknet.meshLoader = () => new HexMesh(teknet, 6);
-    teknet.generator = new SerpuloPlanetGenerator();    
-    
-    // Screw Serpulo orbit imma head into the sun
+    const customGen = new SerpuloPlanetGenerator();
+    customGen.cubemap = null;
+    teknet.generator = customGen;
+
+    // Orbit
     teknet.orbitRadius = Planets.serpulo.orbitRadius - 0.4;
-    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;    // Closer orbits revolve faster
+    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;
     
-    // Rav
+    // Bullshits
     teknet.radius = 2.2; 
     teknet.accessible = true;
     teknet.visible = true;
-    
-    // Atmohfir
-    teknet.atmosphereColor = Color.valueOf("2dbd53"); 
-        
-    // Whatever tf is this
     teknet.sectorSeed = 1337;
     teknet.startSector = 0;
     teknet.alwaysUnlocked = true;
