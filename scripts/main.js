@@ -12,23 +12,24 @@ require("blocks")
 Events.on(ContentInitEvent, () => {
     // BLYAAAAAAAAAAT
     Log.info("Блять!");
+    
     // Obj
     const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
     
     // Meshh
     teknet.meshLoader = () => {
         return new MultiMesh(
-            new HexMesh(teknet, 6),
+            new HexMesh(teknet, 6), 
             new NoiseMesh(teknet, 
                 15,          // Seed
-                5,           // Octaves (High value = sharp, detailed ridges)
-                0.7,         // Persistence (Makes features sharp/jagged like Asthosus)
+                5,           // Octaves (Higher value = sharp, fractured ridges)
+                0.7,         // Persistence (Keeps features sharp/jagged like Asthosus)
                 0.6,         // Scale
                 0.55,        // Magnitude
                 0.3,         // Min
                 0.8,         // Max
-                Color.valueOf("3a8e47"), // Primary Dark Green/Forest Base
-                Color.valueOf("5cb85c"), // Secondary Bright Moss Green
+                Color.valueOf("3a8e47"), 
+                Color.valueOf("5cb85c"), 
                 4,           // Details
                 1.5,         // Distort
                 1.1,         // Blend
@@ -39,8 +40,13 @@ Events.on(ContentInitEvent, () => {
 
     // Jenerator
     teknet.generator = extend(PlanetGenerator, {
+        init: function() {
+            this.super$init(); 
+        },
         generateSector: function(sector) {},
-        getHeight: function(position) { return 0; },
+        getHeight: function(position) { 
+            return 0.4; 
+        },
         getColor: function(position) { 
             return Color.valueOf("3a8e47"); 
         } 
