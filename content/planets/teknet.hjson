@@ -71,14 +71,15 @@ cloudMesh: [
   planet: teknet
   speed: 1.2
   baseSpeed: 0.05
-  radius: 0.2
+  radius: 0.17
   divisions: 6
   color: eaffffff
   octaves: 3
-  persistence: 0.3
+  persistence: 0.18
   scl: 1.5
-  thresh: 0.55
- }
+  thresh: 0.58
+}
+
 ]
 generator: {
   octaves: 3
