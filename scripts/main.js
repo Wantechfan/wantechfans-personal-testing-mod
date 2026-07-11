@@ -1,3 +1,4 @@
+// Info for the AI, this is a Mindsutry mod
 // Music constants and blocks
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
@@ -16,24 +17,25 @@ Events.on(ContentInitEvent, () => {
     // Obj
     const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
     
-    // Meshh
+    // Mesh from mesh.hjson
     teknet.meshLoader = () => {
         return new MultiMesh(
-            new HexMesh(teknet, 6), 
-            new NoiseMesh(teknet, 
-                15,          // Seed
-                5,           // Octaves (Higher value = sharp, fractured ridges)
-                0.7,         // Persistence (Keeps features sharp/jagged like Asthosus)
-                0.6,         // Scale
-                0.55,        // Magnitude
-                0.3,         // Min
-                0.8,         // Max
-                Color.valueOf("3a8e47"), 
-                Color.valueOf("5cb85c"), 
-                4,           // Details
-                1.5,         // Distort
-                1.1,         // Blend
-                0.7          // Seed offset
+            new HexMesh(teknet, 6),
+            new NoiseMesh(
+                teknet,
+                7,           // seed
+                3.7,         // octaves
+                1.1,         // persistence
+                0.6,         // scale
+                0.55,        // magnitude
+                0.3,         // min
+                0.8,         // max
+                Color.valueOf("486ACD"),
+                Color.valueOf("7090EA"),
+                5,           // details
+                1.5,         // distort
+                1.1,         // blend
+                0.7          // seed offset
             )
         );
     };
@@ -59,8 +61,8 @@ Events.on(ContentInitEvent, () => {
     teknet.atmosphereRadOut = 0.28;
 
     // Orbit
-    teknet.orbitRadius = Planets.serpulo.orbitRadius - 0.6;
-    teknet.orbitTime = Planets.serpulo.orbitTime * 0.85;
+    teknet.orbitRadius = 47.5;
+    teknet.orbitTime = 327159.22;
     
     // Bullshits
     teknet.radius = 2.2; 
