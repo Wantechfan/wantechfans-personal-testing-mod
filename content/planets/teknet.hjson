@@ -3,49 +3,49 @@ accessible: true
 visible: true
 mesh: [
  {
-    //water
+    //ice
     type: NoiseMesh
     planet: teknet
     divisions: 5
     seed: 7
     radius: 1.229
-    color1: 486ACD
-    color2: 7090EA
+    color1: F0F0F0
+    color2: DCF2FF
     octaves: 3.7
     persistence: 1.1
-  }
-  {
-    //grass - GO TOUCH IT
-    type: NoiseMesh
-    planet: teknet
-    divisions: 5
-    radius: 1.22
-    seed: 94
-    color1: 42693A
-    color2: 5F8A4A
-    octaves: 3.7
-    persistence: 0.6
   }
   {
     //sand
     type: NoiseMesh
     planet: teknet
+    divisions: 5
+    radius: 1.22
+    seed: 94
+    color1: F7CBA4
+    color2: D3AE8D
+    octaves: 3.7
+    persistence: 0.6
+  }
+  {
+    //water
+    type: NoiseMesh
+    planet: teknet
     divisions: 6
     seed: 101
     radius: 1.2441
-    color1: babca8
-    color2: c6c282
+    color1: 486ACD
+    color2: 7090EA
     octaves: 5.1
     persistence: 0.8
   }
   {
-    //ice
+    //grass - GO TOUCH IT
     type: NoiseMesh
     planet: teknet
     seed: 69
     divisions: 5
-    color1: F0F0F0
-    color2: DCF2FF
+    color1: 42693A
+    color2: 5F8A4A
     radius: 1.212
     octaves: 4
     persistence: 1
