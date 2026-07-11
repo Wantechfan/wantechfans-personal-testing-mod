@@ -151,7 +151,7 @@ drawOrbit: true
 orbitRadius: 47.5
 orbitTime: 327159.22
 // orbitSpacing: 1 //Whatever tf is this
-radius: 2.2
+radius: 1.2
 minZoom: 1
 
 showRtsAIRule: true
