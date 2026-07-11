@@ -150,18 +150,18 @@ solarSystem: sun
 drawOrbit: true
 orbitRadius: 47.5
 orbitTime: 327159.22
-// orbitSpacing: 1 // Whatever tf is this
+// orbitSpacing: 1 //Whatever tf is this
 radius: 2.2
 minZoom: 1
 
 showRtsAIRule: true
 prebuildBase: false
 clearSectorOnLose: true
-defaultCore: core-shard // replace
+defaultCore: core-shard //replace
 enemyCoreSpawnReplace: false
 updateLighting: true
 
 launchCandidates: []
 itemWhitelist: [
-  copper // replace
+  copper //replace
 ]
