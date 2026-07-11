@@ -71,7 +71,7 @@ cloudMesh: [
   planet: teknet
   speed: 1.2
   baseSpeed: 0.05
-  radius: 0.1
+  radius: 0.2
   divisions: 6
   color: eaffffff
   octaves: 3
