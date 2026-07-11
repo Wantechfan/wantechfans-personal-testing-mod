@@ -15,14 +15,14 @@ mesh: [
     persistence: 1.1
   }
   {
-    //sand
+    //rock
     type: NoiseMesh
     planet: teknet
     divisions: 5
     radius: 1.22
     seed: 94
-    color1: F7CBA4
-    color2: D3AE8D
+    color1: 878787
+    color2: 6B6B6B
     octaves: 3.7
     persistence: 0.6
   }
@@ -53,14 +53,14 @@ mesh: [
     mag: 1
   }
   {
-    //rock
+    //sand
     type: NoiseMesh
     planet: teknet
     divisions: 5
     seed: 19
     radius: 1.247
-    color1: 878787
-    color2: 6B6B6B
+    color1: F7CBA4
+    color2: D3AE8D
     octaves: 4.5
     persistence: 1.1
   }
