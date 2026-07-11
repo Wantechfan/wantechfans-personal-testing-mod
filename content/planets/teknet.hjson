@@ -73,7 +73,7 @@ cloudMesh: [
   baseSpeed: 0.05
   radius: 0.16
   divisions: 6
-  color: aaffffff
+  color: ffffffaa
   octaves: 2
   persistence: 0.45
   scl: 1.0
