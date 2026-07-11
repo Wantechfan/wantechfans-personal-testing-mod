@@ -92,7 +92,7 @@ cloudMesh: [
   }
   {
    type: HexSkyMesh
-   planet: asthosus
+   planet: teknet
    speed: 0.891
    radius: 0.091
    divisions: 6
