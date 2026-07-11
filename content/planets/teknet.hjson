@@ -157,11 +157,13 @@ minZoom: 1
 showRtsAIRule: true
 prebuildBase: false
 clearSectorOnLose: true
-defaultCore: core-shard //replace
+//           replace
+defaultCore: core-shard
 enemyCoreSpawnReplace: false
 updateLighting: true
 
 launchCandidates: []
 itemWhitelist: [
-  copper //replace
+  //replace
+  copper
 ]
