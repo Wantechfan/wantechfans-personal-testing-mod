@@ -9,7 +9,7 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
 require("blocks")
 
-// Plenet
+/* // Plenet
 Events.on(ContentInitEvent, () => {
     // BLYAAAAAAAAAAT
     Log.info("Блять!");
@@ -76,7 +76,7 @@ Events.on(ContentInitEvent, () => {
         rules.waveTimer = true;
         rules.waves = true;
     };
-});
+}); */
 
 Events.on(ClientLoadEvent, () => {
     // Yet another constants
