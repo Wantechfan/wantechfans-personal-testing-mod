@@ -17,7 +17,7 @@ mesh: [
   {
     //grass - GO TOUCH IT
     type: NoiseMesh
-    planet: asthosus
+    planet: teknet
     divisions: 5
     radius: 1.22
     seed: 94
@@ -29,7 +29,7 @@ mesh: [
   {
     //sand
     type: NoiseMesh
-    planet: asthosus
+    planet: teknet
     divisions: 6
     seed: 101
     radius: 1.2441
@@ -41,7 +41,7 @@ mesh: [
   {
     //ice
     type: NoiseMesh
-    planet: asthosus
+    planet: teknet
     seed: 69
     divisions: 5
     color1: F0F0F0
@@ -55,7 +55,7 @@ mesh: [
   {
     //rock
     type: NoiseMesh
-    planet: asthosus
+    planet: teknet
     divisions: 5
     seed: 19
     radius: 1.247
@@ -68,7 +68,7 @@ mesh: [
 cloudMesh: [
  {
    type: HexSkyMesh
-   planet: asthosus
+   planet: teknet
    speed: 1.21
    radius: 0.1
    divisions: 6
@@ -80,7 +80,7 @@ cloudMesh: [
   }
   {
    type: HexSkyMesh
-   planet: asthosus
+   planet: teknet
    speed: 1.01
    radius: 0.11
    divisions: 6
