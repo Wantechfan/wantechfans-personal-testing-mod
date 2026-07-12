@@ -7,7 +7,7 @@ const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano")
 const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2")
 const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
-require("blocks")
+//require("blocks")
 
 /* // Plenet
 Events.on(ContentInitEvent, () => {
