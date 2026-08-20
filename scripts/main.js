@@ -1,5 +1,3 @@
-// Info for the AI, this is a Mindsutry mod
-// Music constants and blocks
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
 const darkMusic3 = Vars.tree.loadMusic("winterWind")
