@@ -20,7 +20,7 @@ function onWorldLoad(e) {
             sector.preset = fake;
         }
     } catch(err) {
-        print(err);
+        Log.err(err);
     }
 }
 
