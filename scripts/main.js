@@ -163,15 +163,13 @@ Events.on(ClientLoadEvent, () => {
         }
     }
 
-    
     const SectorPreset = Java.type('mindustry.type.SectorPreset');
     const Events = Java.type('arc.Events');
     const WorldLoadEvent = Java.type('mindustry.game.EventType$WorldLoadEvent');
-    const Vars = Java.type('mindustry.Vars');
     let originalPreset = null;
 
     function onWorldLoad(e){
-        try{
+        try {
             if(!Vars.state.hasSector())
                 return;
             let sector = Vars.state.getSector();
