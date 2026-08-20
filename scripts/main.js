@@ -162,4 +162,25 @@ Events.on(ClientLoadEvent, () => {
             mortar.reload = 1;
         }
     }
+
+    
+    const SectorPreset = Java.type('mindustry.type.SectorPreset');
+    const Events = Java.type('arc.Events');
+    const WorldLoadEvent = Java.type('mindustry.game.EventType$WorldLoadEvent');
+    const Vars = Java.type('mindustry.Vars');
+    let originalPreset = null;
+
+    function onWorldLoad(e){
+        try{
+            if(!Vars.state.hasSector())
+                return;
+            let sector = Vars.state.getSector();
+            if(sector.preset == null){
+                originalPreset = null;
+                let fake = new SectorPreset("js-no-polygon-preset", sector.planet, sector.id);
+                fake.noLighting = true;
+                sector.preset = fake;
+            }
+        } catch(err) {print(err);}}
+    Events.on(WorldLoadEvent.class, new JavaAdapter(Java.type('arc.util.Cons'), {get:function(e){onWorldLoad(e);}}));
 });
