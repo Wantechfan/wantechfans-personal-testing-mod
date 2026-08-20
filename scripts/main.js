@@ -7,25 +7,8 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
 //require("blocks")
 
-let originalPreset = null;
-function onWorldLoad(e) {
-    try {
-        if (!Vars.state.hasSector()) return;
-        
-        let sector = Vars.state.getSector();
-        if (sector.preset == null) {
-            originalPreset = null;
-            let fake = new SectorPreset("js-no-polygon-preset", sector.planet, sector.id);
-            fake.noLighting = true;
-            sector.preset = fake;
-        }
-    } catch(err) {
-        Log.err(err);
-    }
-}
-
 Events.on(WorldLoadEvent, e => {
-    onWorldLoad(e);
+    Vars.state.rules.borderDarkness = false;
 });
 
 Events.on(ClientLoadEvent, () => {
