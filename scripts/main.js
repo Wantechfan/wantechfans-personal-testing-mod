@@ -9,74 +9,26 @@ const ambientMusic3 = Vars.tree.loadMusic("marimba")
 const bossMusic = Vars.tree.loadMusic("racethesun")
 //require("blocks")
 
-/* // Plenet
-Events.on(ContentInitEvent, () => {
-    // BLYAAAAAAAAAAT
-    Log.info("Блять!");
-    
-    // Obj
-    const teknet = new Planet("teknet", Planets.sun, 1.5, 3);
-    
-    // Mesh from mesh.hjson
-    teknet.meshLoader = () => {
-        return new MultiMesh(
-            new HexMesh(teknet, 6),
-            new NoiseMesh(
-                teknet,
-                7,           // seed
-                3.7,         // octaves
-                1.1,         // persistence
-                0.6,         // scale
-                0.55,        // magnitude
-                0.3,         // min
-                0.8,         // max
-                Color.valueOf("486ACD"),
-                Color.valueOf("7090EA"),
-                5,           // details
-                1.5,         // distort
-                1.1,         // blend
-                0.7          // seed offset
-            )
-        );
-    };
+let originalPreset = null;
+function onWorldLoad(e) {
+    try {
+        if (!Vars.state.hasSector()) return;
+        
+        let sector = Vars.state.getSector();
+        if (sector.preset == null) {
+            originalPreset = null;
+            let fake = new SectorPreset("js-no-polygon-preset", sector.planet, sector.id);
+            fake.noLighting = true;
+            sector.preset = fake;
+        }
+    } catch(err) {
+        print(err);
+    }
+}
 
-    // Jenerator
-    teknet.generator = extend(PlanetGenerator, {
-        init: function() {
-            this.super$init(); 
-        },
-        generateSector: function(sector) {},
-        getHeight: function(position) { 
-            return 0.4; 
-        },
-        getColor: function(position) { 
-            return Color.valueOf("3a8e47"); 
-        } 
-    });
-    
-    // Atmosfahh
-    teknet.hasAtmosphere = true;
-    teknet.atmosphereColor = Color.valueOf("2dbd53"); 
-    teknet.atmosphereRadIn = 0.02;
-    teknet.atmosphereRadOut = 0.28;
-
-    // Orbit
-    teknet.orbitRadius = 47.5;
-    teknet.orbitTime = 327159.22;
-    
-    // Bullshits
-    teknet.radius = 2.2; 
-    teknet.accessible = true;
-    teknet.visible = true;
-    teknet.sectorSeed = 1337;
-    teknet.startSector = 0;
-    teknet.alwaysUnlocked = true;
-    
-    teknet.ruleSetter = rules => {
-        rules.waveTimer = true;
-        rules.waves = true;
-    };
-}); */
+Events.on(WorldLoadEvent, e => {
+    onWorldLoad(e);
+});
 
 Events.on(ClientLoadEvent, () => {
     // Yet another constants
@@ -162,19 +114,4 @@ Events.on(ClientLoadEvent, () => {
             mortar.reload = 1;
         }
     }
-    
-    let originalPreset = null;
-    function onWorldLoad(e){
-        try {
-            if(!Vars.state.hasSector())
-                return;
-            let sector = Vars.state.getSector();
-            if(sector.preset == null){
-                originalPreset = null;
-                let fake = new SectorPreset("js-no-polygon-preset", sector.planet, sector.id);
-                fake.noLighting = true;
-                sector.preset = fake;
-            }
-        } catch(err) {print(err);}}
-    Events.on(WorldLoadEvent.class, new JavaAdapter(Java.type('arc.util.Cons'), {get:function(e){onWorldLoad(e);}}));
 });
