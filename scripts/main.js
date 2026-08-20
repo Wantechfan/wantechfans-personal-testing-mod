@@ -162,12 +162,8 @@ Events.on(ClientLoadEvent, () => {
             mortar.reload = 1;
         }
     }
-
-    const SectorPreset = Java.type('mindustry.type.SectorPreset');
-    const Events = Java.type('arc.Events');
-    const WorldLoadEvent = Java.type('mindustry.game.EventType$WorldLoadEvent');
+    
     let originalPreset = null;
-
     function onWorldLoad(e){
         try {
             if(!Vars.state.hasSector())
