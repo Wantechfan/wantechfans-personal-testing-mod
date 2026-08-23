@@ -129,10 +129,10 @@ Events.on(ClientLoadEvent, () => {
         });
 
         Vars.world = customWorld;
-        Vars.world.tiles = oldWorld.tiles;
 
-        Core.app.removeListener(oldWorld);
-        Core.app.addListener(Vars.world);
+        if (oldWorld.tiles != null) {
+            Vars.world.tiles = oldWorld.tiles;
+        }
     } catch(e) {
         Log.err("had a brain aneurysm when doing this: " + e)
     }
