@@ -102,7 +102,7 @@ Events.on(ClientLoadEvent, () => {
             getDarkness(x, y) {
                 let dark = 0;
 
-                if (Vars.state.rules.borderDarkness) {
+                //if (Vars.state.rules.borderDarkness) {
                     let edgeBlend = 2;
                     let edgeDst;
 
@@ -117,7 +117,7 @@ Events.on(ClientLoadEvent, () => {
                     if (edgeDst <= edgeBlend) {
                         dark = Math.max((edgeBlend - edgeDst) * (4 / edgeBlend), dark);
                     }
-                }
+                //}
 
                 let tile = this.tile(x, y);
                 if (tile != null && tile.isDarkened()) {
