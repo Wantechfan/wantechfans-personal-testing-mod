@@ -101,23 +101,20 @@ Events.on(ClientLoadEvent, () => {
         const customWorld = extend(Packages.mindustry.core.World, {
             getDarkness(x, y) {
                 let dark = 0;
+                let edgeBlend = 2;
+                let edgeDst;
 
-                //if (Vars.state.rules.borderDarkness) {
-                    let edgeBlend = 2;
-                    let edgeDst;
+                if (!Vars.state.rules.limitMapArea) {
+                    edgeDst = Math.min(x, Math.min(y, Math.min(-(x - (this.tiles.width - 1)), -(y - (this.tiles.height - 1)))));
+                } else {
+                    edgeDst = Math.min(x - Vars.state.rules.limitX,
+                        Math.min(y - Vars.state.rules.limitY,
+                        Math.min(-(x - (Vars.state.rules.limitX + Vars.state.rules.limitWidth - 1)), -(y - (Vars.state.rules.limitY + Vars.state.rules.limitHeight - 1)))));
+                }
 
-                    if (!Vars.state.rules.limitMapArea) {
-                        edgeDst = Math.min(x, Math.min(y, Math.min(-(x - (this.tiles.width - 1)), -(y - (this.tiles.height - 1)))));
-                    } else {
-                        edgeDst = Math.min(x - Vars.state.rules.limitX,
-                            Math.min(y - Vars.state.rules.limitY,
-                            Math.min(-(x - (Vars.state.rules.limitX + Vars.state.rules.limitWidth - 1)), -(y - (Vars.state.rules.limitY + Vars.state.rules.limitHeight - 1)))));
-                    }
-
-                    if (edgeDst <= edgeBlend) {
-                        dark = Math.max((edgeBlend - edgeDst) * (4 / edgeBlend), dark);
-                    }
-                //}
+                if (edgeDst <= edgeBlend) {
+                    dark = Math.max((edgeBlend - edgeDst) * (4 / edgeBlend), dark);
+                }
 
                 let tile = this.tile(x, y);
                 if (tile != null && tile.isDarkened()) {
