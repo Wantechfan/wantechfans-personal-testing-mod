@@ -95,42 +95,93 @@ Events.on(ClientLoadEvent, () => {
         }
     }
     
-    try {
-        const oldWorld = Vars.world;
+    const oldWorld = Vars.world;
+    const customWorld = extend(Packages.mindustry.core.World, {
+        getDarkness(x, y) {
+            let dark = 0;
+            let edgeBlend = 2;
+            let edgeDst;
 
-        const customWorld = extend(Packages.mindustry.core.World, {
-            getDarkness(x, y) {
-                let dark = 0;
-                let edgeBlend = 2;
-                let edgeDst;
-
-                if (!Vars.state.rules.limitMapArea) {
-                    edgeDst = Math.min(x, Math.min(y, Math.min(-(x - (this.tiles.width - 1)), -(y - (this.tiles.height - 1)))));
-                } else {
-                    edgeDst = Math.min(x - Vars.state.rules.limitX,
-                        Math.min(y - Vars.state.rules.limitY,
-                        Math.min(-(x - (Vars.state.rules.limitX + Vars.state.rules.limitWidth - 1)), -(y - (Vars.state.rules.limitY + Vars.state.rules.limitHeight - 1)))));
-                }
-
-                if (edgeDst <= edgeBlend) {
-                    dark = Math.max((edgeBlend - edgeDst) * (4 / edgeBlend), dark);
-                }
-
-                let tile = this.tile(x, y);
-                if (tile != null && tile.isDarkened()) {
-                    dark = Math.max(dark, tile.data);
-                }
-
-                return dark;
+            if (!Vars.state.rules.limitMapArea) {
+                edgeDst = Math.min(x, Math.min(y, Math.min(-(x - (this.tiles.width - 1)), -(y - (this.tiles.height - 1)))));
+            } else {
+                edgeDst = Math.min(x - Vars.state.rules.limitX,
+                    Math.min(y - Vars.state.rules.limitY,
+                    Math.min(-(x - (Vars.state.rules.limitX + Vars.state.rules.limitWidth - 1)), -(y - (Vars.state.rules.limitY + Vars.state.rules.limitHeight - 1)))));
             }
-        });
 
-        Vars.world = customWorld;
+            if (edgeDst <= edgeBlend) {
+                dark = Math.max((edgeBlend - edgeDst) * (4 / edgeBlend), dark);
+            }
 
-        if (oldWorld.tiles != null) {
-            Vars.world.tiles = oldWorld.tiles;
+            let tile = this.tile(x, y);
+            if (tile != null && tile.isDarkened()) {
+                dark = Math.max(dark, tile.data);
+            }
+
+            return dark;
         }
+    });
+
+    Vars.world = customWorld;
+
+    if (oldWorld.tiles != null) {
+        Vars.world.tiles = oldWorld.tiles;
+    }
+
+    try {
+    function scrambleString(str) {
+        const chars = str.split('');
+        for (let i = chars.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [chars[i], chars[j]] = [chars[j], chars[i]];
+        }
+        return chars.join('');
+    }
+
+    function randomizeBundle(bundleContent) {
+        const lineRegex = /^([^=]+)=(.*)$/;
+        const tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
+
+        return bundleContent
+            .split('\n')
+            .map(line => {
+                if (line.trim().startsWith('#') || !line.includes('=')) {
+                    return line;
+                }
+
+                const match = line.match(lineRegex);
+                if (!match) return line;
+
+                const key = match[1];
+                const value = match[2];
+
+                const parts = value.split(tagRegex);
+
+                const scrambledValue = parts
+                    .map(part => {
+                    if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
+                        return part;
+                    }
+                return scrambleString(part);
+            })
+            .join('');
+
+            return `${key}=${scrambledValue}`;
+        })
+        .join('\n');
+    }
+
+    const sampleBundle = `
+    # Mindustry Bundle Example
+    item.copper.name=Copper
+    item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].
+    block.conveyor.name=[red]Conveyor[] Belt
+    item.copper.details=Requires {0} to construct {1}.
+    `;
+
+    console.log(randomizeBundle(sampleBundle));
     } catch(e) {
-        Log.err("had a brain aneurysm when doing this: " + e)
+        Log.err("Had a brain failure when doing this: " + e)
     }
 });
