@@ -172,13 +172,12 @@ Events.on(ClientLoadEvent, () => {
         .join('\n');
     }
 
-    const sampleBundle = `
-    # Mindustry Bundle Example
-    item.copper.name=Copper
-    item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].
-    block.conveyor.name=[red]Conveyor[] Belt
-    item.copper.details=Requires {0} to construct {1}.
-    `;
+    const sampleBundle = 
+        "# Mindustry Bundle Example\n" +
+        "item.copper.name=Copper\n" +
+        "item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].\n" +
+        "block.conveyor.name=[red]Conveyor[] Belt\n" +
+        "item.copper.details=Requires {0} to construct {1}.";
 
     console.log(randomizeBundle(sampleBundle));
     } catch(e) {
