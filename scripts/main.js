@@ -130,56 +130,60 @@ Events.on(ClientLoadEvent, () => {
     }
 
     try {
-    function scrambleString(str) {
-        const chars = str.split('');
-        for (let i = chars.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [chars[i], chars[j]] = [chars[j], chars[i]];
+        function scrambleString(str) {
+            var chars = str.split('');
+            for (var i = chars.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = chars[i];
+                chars[i] = chars[j];
+                chars[j] = temp;
+            }
+            return chars.join('');
         }
-        return chars.join('');
-    }
 
-    function randomizeBundle(bundleContent) {
-        const lineRegex = /^([^=]+)=(.*)$/;
-        const tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
+        function randomizeBundle(bundleContent) {
+            var lineRegex = /^([^=]+)=(.*)$/;
+            var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
 
-        return bundleContent
-            .split('\n')
-            .map(line => {
-                if (line.trim().startsWith('#') || !line.includes('=')) {
+            return bundleContent
+                .split('\n')
+                .map(function(line) {
+                    if (line.trim().indexOf('#') === 0 || line.indexOf('=') === -1) {
                     return line;
                 }
 
-                const match = line.match(lineRegex);
+                var match = line.match(lineRegex);
                 if (!match) return line;
 
-                const key = match[1];
-                const value = match[2];
+                var key = match[1];
+                var value = match[2];
 
-                const parts = value.split(tagRegex);
+                var parts = value.split(tagRegex);
 
-                const scrambledValue = parts
-                    .map(part => {
+                var scrambledValue = parts
+                    .map(function(part) {
                     if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
                         return part;
                     }
-                return scrambleString(part);
+                    return scrambleString(part);
+                })
+                .join('');
+
+                return key + "=" + scrambledValue;
             })
-            .join('');
+            .join('\n');
+        }
 
-            return `${key}=${scrambledValue}`;
-        })
-        .join('\n');
-    }
+        var sampleBundle = 
+            "# Mindustry Bundle Example\n" +
+            "item.copper.name=Copper\n" +
+            "item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].\n" +
+            "block.conveyor.name=[red]Conveyor[] Belt\n" +
+            "item.copper.details=Requires {0} to construct {1}.";
 
-    const sampleBundle = 
-        "# Mindustry Bundle Example\n" +
-        "item.copper.name=Copper\n" +
-        "item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].\n" +
-        "block.conveyor.name=[red]Conveyor[] Belt\n" +
-        "item.copper.details=Requires {0} to construct {1}.";
-
-    Log.info(randomizeBundle(sampleBundle));
+        Events.on(ClientLoadEvent.class, function() {
+            Log.info(randomizeBundle(sampleBundle));
+        });
     } catch(e) {
         Log.err("Had a brain failure when doing this: " + e)
     }
