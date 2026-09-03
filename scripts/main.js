@@ -41,19 +41,16 @@ Events.on(ClientLoadEvent, function() {
         var properties = Core.bundle.getProperties();
         
         if (!properties) {
-            Log.err("Core.bundle properties object is no exist!");
+            Log.err("Core.bundle properties object is null!");
             return;
         }
 
-        var keys = properties.keys();
-        while (keys.hasNext()) {
-            var key = keys.next();
-            var originalValue = properties.get(key);
-
+        // Use Arc's native .each() method on ObjectMap
+        properties.each(function(key, originalValue) {
             if (originalValue) {
                 properties.put(key, scrambleValue(originalValue));
             }
-        }
+        });
 
         Log.info("Bundle scrambled for good.");
     } catch(e) {
