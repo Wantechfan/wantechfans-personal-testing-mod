@@ -129,49 +129,54 @@ Events.on(ClientLoadEvent, () => {
         Vars.world.tiles = oldWorld.tiles;
     }
 
-    try {
-        function scrambleString(str) {
-            var chars = str.split('');
-            for (var i = chars.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = chars[i];
-                chars[i] = chars[j];
-                chars[j] = temp;
-            }
-            return chars.join('');
+    function scrambleString(str) {
+        var chars = str.split('');
+        for (var i = chars.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = temp;
         }
+        return chars.join('');
+    }
 
-        function scrambleValue(value) {
-            var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
-            var parts = value.split(tagRegex);
+    function scrambleValue(value) {
+        var valStr = String(value);
+        var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
+        var parts = valStr.split(tagRegex);
 
-            return parts
-                .map(function(part) {
-                    if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
-                        return part;
-                    }
-                    return scrambleString(part);
-                })
+        return parts
+            .map(function(part) {
+                if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
+                    return part;
+                }
+                return scrambleString(part);
+            })
             .join('');
-        }
+    }
 
-        Events.on(ClientLoadEvent, function() {
+    Events.on(ClientLoadEvent, function() {
+        try {
             var properties = Core.bundle.getProperties();
-            var entries = properties.entries();
+        
+            if (!properties) {
+                Log.err("Core.bundle properties object is no exist!");
+                return;
+            }
 
-            while (entries.hasNext()) {
-                var entry = entries.next();
-                var key = entry.key;
-                var originalValue = entry.value;
+            var keys = properties.keys();
+            while (keys.hasNext()) {
+                var key = keys.next();
+                var originalValue = properties.get(key);
 
                 if (originalValue) {
                     properties.put(key, scrambleValue(originalValue));
                 }
             }
 
-            Log.info("Bandel scrambled for good.");
-        });
-    } catch(e) {
-        Log.err("Had a brain failure when doing this: " + e)
-    }
+            Log.info("Bundle scrambled for good.");
+        } catch(e) {
+            Log.err("Had a brain failure when doing this: " + e);
+        }
+    });
 });
