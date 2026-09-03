@@ -11,7 +11,8 @@ Events.on(WorldLoadEvent, e => {
 });
 
 function scrambleString(str) {
-    var chars = str.split('');
+    if (!str) return str;
+    var chars = String(str).split('');
     for (var i = chars.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = chars[i];
@@ -22,6 +23,7 @@ function scrambleString(str) {
 }
 
 function scrambleValue(value) {
+    if (!value) return value;
     var valStr = String(value);
     var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
     var parts = valStr.split(tagRegex);
@@ -38,21 +40,44 @@ function scrambleValue(value) {
 
 Events.on(ClientLoadEvent, function() {
     try {
+        // 1. Scramble general Core.bundle UI strings
         var properties = Core.bundle.getProperties();
-        
-        if (!properties) {
-            Log.err("Core.bundle properties object is null!");
-            return;
+        if (properties) {
+            properties.each(function(key, originalValue) {
+                if (originalValue) {
+                    properties.put(key, scrambleValue(originalValue));
+                }
+            });
         }
 
-        // Use Arc's native .each() method on ObjectMap
-        properties.each(function(key, originalValue) {
-            if (originalValue) {
-                properties.put(key, scrambleValue(originalValue));
+        // 2. Scramble Block & Item content names/descriptions
+        Vars.content.each(function(content) {
+            if (content.localizedName) {
+                content.localizedName = scrambleValue(content.localizedName);
+            }
+            if (content.description) {
+                content.description = scrambleValue(content.description);
+            }
+            if (content.details) {
+                content.details = scrambleValue(content.details);
             }
         });
 
-        Log.info("Bundle scrambled for good.");
+        // 3. Scramble Planet & Sector names
+        Vars.content.planets().each(function(planet) {
+            if (planet.localizedName) {
+                planet.localizedName = scrambleValue(planet.localizedName);
+            }
+            if (planet.sectors) {
+                planet.sectors.each(function(sector) {
+                    if (sector.preset && sector.preset.localizedName) {
+                        sector.preset.localizedName = scrambleValue(sector.preset.localizedName);
+                    }
+                });
+            }
+        });
+
+        Log.info("Bundle and game content scrambled for good.");
     } catch(e) {
         Log.err("Had a brain failure when doing this: " + e);
     }
