@@ -10,6 +10,57 @@ Events.on(WorldLoadEvent, e => {
     Vars.state.rules.borderDarkness = false;
 });
 
+function scrambleString(str) {
+    var chars = str.split('');
+    for (var i = chars.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = chars[i];
+        chars[i] = chars[j];
+        chars[j] = temp;
+    }
+    return chars.join('');
+}
+
+function scrambleValue(value) {
+    var valStr = String(value);
+    var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
+    var parts = valStr.split(tagRegex);
+
+    return parts
+        .map(function(part) {
+            if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
+                return part;
+            }
+            return scrambleString(part);
+        })
+        .join('');
+}
+
+Events.on(ClientLoadEvent, function() {
+    try {
+        var properties = Core.bundle.getProperties();
+        
+        if (!properties) {
+            Log.err("Core.bundle properties object is no exist!");
+            return;
+        }
+
+        var keys = properties.keys();
+        while (keys.hasNext()) {
+            var key = keys.next();
+            var originalValue = properties.get(key);
+
+            if (originalValue) {
+                properties.put(key, scrambleValue(originalValue));
+            }
+        }
+
+        Log.info("Bundle scrambled for good.");
+    } catch(e) {
+        Log.err("Had a brain failure when doing this: " + e);
+    }
+});
+
 Events.on(ClientLoadEvent, () => {
     // Yet another constants
     const soundManager = Vars.control.sound;
@@ -128,55 +179,4 @@ Events.on(ClientLoadEvent, () => {
     if (oldWorld.tiles != null) {
         Vars.world.tiles = oldWorld.tiles;
     }
-
-    function scrambleString(str) {
-        var chars = str.split('');
-        for (var i = chars.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var temp = chars[i];
-            chars[i] = chars[j];
-            chars[j] = temp;
-        }
-        return chars.join('');
-    }
-
-    function scrambleValue(value) {
-        var valStr = String(value);
-        var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
-        var parts = valStr.split(tagRegex);
-
-        return parts
-            .map(function(part) {
-                if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
-                    return part;
-                }
-                return scrambleString(part);
-            })
-            .join('');
-    }
-
-    Events.on(ClientLoadEvent, function() {
-        try {
-            var properties = Core.bundle.getProperties();
-        
-            if (!properties) {
-                Log.err("Core.bundle properties object is no exist!");
-                return;
-            }
-
-            var keys = properties.keys();
-            while (keys.hasNext()) {
-                var key = keys.next();
-                var originalValue = properties.get(key);
-
-                if (originalValue) {
-                    properties.put(key, scrambleValue(originalValue));
-                }
-            }
-
-            Log.info("Bundle scrambled for good.");
-        } catch(e) {
-            Log.err("Had a brain failure when doing this: " + e);
-        }
-    });
 });
