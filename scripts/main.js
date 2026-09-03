@@ -10,6 +10,7 @@ Events.on(WorldLoadEvent, e => {
     Vars.state.rules.borderDarkness = false;
 });
 
+/* All this shii is dumped into Text Scrambler mod
 function scrambleString(str) {
     if (!str) return str;
     var chars = String(str).split('');
@@ -40,7 +41,6 @@ function scrambleValue(value) {
 
 Events.on(ClientLoadEvent, function() {
     try {
-        // 1. Scramble general Core.bundle UI strings
         var properties = Core.bundle.getProperties();
         if (properties) {
             properties.each(function(key, originalValue) {
@@ -50,7 +50,6 @@ Events.on(ClientLoadEvent, function() {
             });
         }
 
-        // 2. Scramble Block & Item content names/descriptions
         Vars.content.each(function(content) {
             if (content.localizedName) {
                 content.localizedName = scrambleValue(content.localizedName);
@@ -63,7 +62,6 @@ Events.on(ClientLoadEvent, function() {
             }
         });
 
-        // 3. Scramble Planet & Sector names
         Vars.content.planets().each(function(planet) {
             if (planet.localizedName) {
                 planet.localizedName = scrambleValue(planet.localizedName);
@@ -82,6 +80,7 @@ Events.on(ClientLoadEvent, function() {
         Log.err("Had a brain failure when doing this: " + e);
     }
 });
+*/ 
 
 Events.on(ClientLoadEvent, () => {
     // Yet another constants
