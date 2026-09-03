@@ -141,47 +141,36 @@ Events.on(ClientLoadEvent, () => {
             return chars.join('');
         }
 
-        function randomizeBundle(bundleContent) {
-            var lineRegex = /^([^=]+)=(.*)$/;
+        function scrambleValue(value) {
             var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
+            var parts = value.split(tagRegex);
 
-            return bundleContent
-                .split('\n')
-                .map(function(line) {
-                    if (line.trim().indexOf('#') === 0 || line.indexOf('=') === -1) {
-                    return line;
-                }
-
-                var match = line.match(lineRegex);
-                if (!match) return line;
-
-                var key = match[1];
-                var value = match[2];
-
-                var parts = value.split(tagRegex);
-
-                var scrambledValue = parts
-                    .map(function(part) {
+            return parts
+                .map(function(part) {
                     if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
                         return part;
                     }
                     return scrambleString(part);
                 })
-                .join('');
-
-                return key + "=" + scrambledValue;
-            })
-            .join('\n');
+            .join('');
         }
 
-        var sampleBundle = 
-            "# Mindustry Bundle Example\n" +
-            "item.copper.name=Copper\n" +
-            "item.copper.description=Used in [stat]all[] basic structures and [accent]{0}[].\n" +
-            "block.conveyor.name=[red]Conveyor[] Belt\n" +
-            "item.copper.details=Requires {0} to construct {1}.";
+        Events.on(ClientLoadEvent, function() {
+            var properties = Core.bundle.getProperties();
+            var entries = properties.entries();
 
-        Log.info(randomizeBundle(sampleBundle));
+            while (entries.hasNext()) {
+                var entry = entries.next();
+                var key = entry.key;
+                var originalValue = entry.value;
+
+                if (originalValue) {
+                    properties.put(key, scrambleValue(originalValue));
+                }
+            }
+
+            Log.info("Bandel scrambled for good.");
+        });
     } catch(e) {
         Log.err("Had a brain failure when doing this: " + e)
     }
