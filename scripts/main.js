@@ -181,9 +181,7 @@ Events.on(ClientLoadEvent, () => {
             "block.conveyor.name=[red]Conveyor[] Belt\n" +
             "item.copper.details=Requires {0} to construct {1}.";
 
-        Events.on(ClientLoadEvent, function() {
-            Log.info(randomizeBundle(sampleBundle));
-        });
+        Log.info(randomizeBundle(sampleBundle));
     } catch(e) {
         Log.err("Had a brain failure when doing this: " + e)
     }
