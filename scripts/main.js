@@ -1,86 +1,19 @@
+// Muziks
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
 const darkMusic3 = Vars.tree.loadMusic("winterWind")
+const darkMusic4 = Vars.tree.loadMusic("torrent")
 const ambientMusic1 = Vars.tree.loadMusic("dreitonPiano")
 const ambientMusic2 = Vars.tree.loadMusic("moonlightSonata2")
-const ambientMusic3 = Vars.tree.loadMusic("marimba")
-const bossMusic = Vars.tree.loadMusic("racethesun")
+const ambientMusic3 = Vars.tree.loadMusic("moonlightSonata3Marimba")
+const ambientMusic4 = Vars.tree.loadMusic("clairDeLune")
+const ambientMusic5 = Vars.tree.loadMusic("hammerklavier")
+const ambientMusic6 = Vars.tree.loadMusic("nocturne-9-2")
+const bossMusic = Vars.tree.loadMusic("raceTheSun")
 
 Events.on(WorldLoadEvent, e => {
     Vars.state.rules.borderDarkness = false;
 });
-
-/* All this shii is dumped into Text Scrambler mod
-function scrambleString(str) {
-    if (!str) return str;
-    var chars = String(str).split('');
-    for (var i = chars.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = chars[i];
-        chars[i] = chars[j];
-        chars[j] = temp;
-    }
-    return chars.join('');
-}
-
-function scrambleValue(value) {
-    if (!value) return value;
-    var valStr = String(value);
-    var tagRegex = /(\[[^\]]*\]|\{[0-9]+\})/g;
-    var parts = valStr.split(tagRegex);
-
-    return parts
-        .map(function(part) {
-            if (part.match(/^(\[[^\]]*\]|\{[0-9]+\})$/)) {
-                return part;
-            }
-            return scrambleString(part);
-        })
-        .join('');
-}
-
-Events.on(ClientLoadEvent, function() {
-    try {
-        var properties = Core.bundle.getProperties();
-        if (properties) {
-            properties.each(function(key, originalValue) {
-                if (originalValue) {
-                    properties.put(key, scrambleValue(originalValue));
-                }
-            });
-        }
-
-        Vars.content.each(function(content) {
-            if (content.localizedName) {
-                content.localizedName = scrambleValue(content.localizedName);
-            }
-            if (content.description) {
-                content.description = scrambleValue(content.description);
-            }
-            if (content.details) {
-                content.details = scrambleValue(content.details);
-            }
-        });
-
-        Vars.content.planets().each(function(planet) {
-            if (planet.localizedName) {
-                planet.localizedName = scrambleValue(planet.localizedName);
-            }
-            if (planet.sectors) {
-                planet.sectors.each(function(sector) {
-                    if (sector.preset && sector.preset.localizedName) {
-                        sector.preset.localizedName = scrambleValue(sector.preset.localizedName);
-                    }
-                });
-            }
-        });
-
-        Log.info("Bundle and game content scrambled for good.");
-    } catch(e) {
-        Log.err("Had a brain failure when doing this: " + e);
-    }
-});
-*/ 
 
 Events.on(ClientLoadEvent, () => {
     // Yet another constants
@@ -105,8 +38,8 @@ Events.on(ClientLoadEvent, () => {
 
     // Music setting
     if (Core.settings.getBool("epicMusics", false)) {
-        soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3);
-        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3);
+        soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3, darkMusic4);
+        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3, ambientMusic4, ambientMusic5, ambientMusic6);
         soundManager.bossMusic.add(bossMusic);
     }
 
