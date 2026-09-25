@@ -10,6 +10,7 @@ const ambientMusic4 = Vars.tree.loadMusic("clairDeLune")
 const ambientMusic5 = Vars.tree.loadMusic("hammerklavier")
 const ambientMusic6 = Vars.tree.loadMusic("nocturne-9-2")
 const ambientMusic7 = Vars.tree.loadMusic("laCampanella")
+const ambientMusic8 = Vars.tree.loadMusic("symphony5")
 const bossMusic = Vars.tree.loadMusic("raceTheSun")
 
 Events.on(WorldLoadEvent, e => {
@@ -40,7 +41,7 @@ Events.on(ClientLoadEvent, () => {
     // Music setting
     if (Core.settings.getBool("epicMusics", false)) {
         soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3, darkMusic4);
-        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3, ambientMusic4, ambientMusic5, ambientMusic6, ambientMusic7);
+        soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3, ambientMusic4, ambientMusic5, ambientMusic6, ambientMusic7, ambientMusic8);
         soundManager.bossMusic.add(bossMusic);
     }
 
