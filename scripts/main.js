@@ -27,52 +27,48 @@ const liz = "Franz Lizst"
 const sb = "Scott Buckley"
 const c418 = "C418"
 
-const def = "icon-mindustry"
-const none = "icon-none"
-
 // Informetion
-function MusicInfo(iconName, name, author) {
-    this.iconName = iconName;
+function MusicInfo(name, author) {
     this.name = name;
     this.author = author;
 }
 
 // Your average Mindihtry musics
-musics.put("game1", new MusicInfo(def, "Game 1", anu));
-musics.put("game2", new MusicInfo(def, "Game 2", anu));
-musics.put("game3", new MusicInfo(def, "Game 3", anu));
-musics.put("game4", new MusicInfo(def, "Game 4", anu));
-musics.put("game5", new MusicInfo(def, "Game 5", anu));
-musics.put("game6", new MusicInfo(def, "Game 6", anu));
-musics.put("game7", new MusicInfo(def, "Game 7", anu));
-musics.put("game8", new MusicInfo(def, "Game 8", anu));
-musics.put("game9", new MusicInfo(def, "Game 9", anu));
-musics.put("fine", new MusicInfo(def, "Fine", anu));
-musics.put("boss1", new MusicInfo(def, "Boss 1", anu));
-musics.put("boss2", new MusicInfo(def, "Boss 2", anu));
+musics.put("game1", new MusicInfo("Game 1", anu));
+musics.put("game2", new MusicInfo("Game 2", anu));
+musics.put("game3", new MusicInfo("Game 3", anu));
+musics.put("game4", new MusicInfo("Game 4", anu));
+musics.put("game5", new MusicInfo("Game 5", anu));
+musics.put("game6", new MusicInfo("Game 6", anu));
+musics.put("game7", new MusicInfo("Game 7", anu));
+musics.put("game8", new MusicInfo("Game 8", anu));
+musics.put("game9", new MusicInfo("Game 9", anu));
+musics.put("fine", new MusicInfo("Fine", anu));
+musics.put("boss1", new MusicInfo("Boss 1", anu));
+musics.put("boss2", new MusicInfo("Boss 2", anu));
 
 // Fire musics
-musics.put("moonlightSonata3", new MusicInfo(none, "Moonlight Sonata 3rd mvt", bee));
-musics.put("moonlightSonata1", new MusicInfo(none, "Moonlight Sonata 1st mvt", bee));
-musics.put("winterWind", new MusicInfo(none, "Winter Wind", cho));
-musics.put("torrent", new MusicInfo(none, "Torrent", cho));
-musics.put("dreitonPiano", new MusicInfo(none, "Dreiton Piano", c418));
-musics.put("moonlightSonata2", new MusicInfo(none, "Moonlight Sonata 2nd mvt", bee));
-musics.put("moonlightSonata3Marimba", new MusicInfo(none, "Moonlight Sonata 3rd mvt (Marimba)", bee));
-musics.put("clairDeLune", new MusicInfo(none, "Clair de Lune", deb));
-musics.put("hammerklavier", new MusicInfo(none, "Hammerklavier", bee));
-musics.put("nocturne-9-2", new MusicInfo(none, "Nocturne Op. 9 No. 2", cho));
-musics.put("laCampanella", new MusicInfo(none, "La Campanella", liz));
-musics.put("symphony5", new MusicInfo(none, "Symphony No. 5", bee));
-musics.put("preludeGMinor", new MusicInfo(none, "Prelude in G Minor", rac));
-musics.put("raceTheSun", new MusicInfo(none, "Race The Sun", sb));
+musics.put("moonlightSonata3", new MusicInfo("Moonlight Sonata 3rd mvt", bee));
+musics.put("moonlightSonata1", new MusicInfo("Moonlight Sonata 1st mvt", bee));
+musics.put("winterWind", new MusicInfo("Winter Wind", cho));
+musics.put("torrent", new MusicInfo("Torrent", cho));
+musics.put("dreitonPiano", new MusicInfo("Dreiton Piano", c418));
+musics.put("moonlightSonata2", new MusicInfo("Moonlight Sonata 2nd mvt", bee));
+musics.put("moonlightSonata3Marimba", new MusicInfo("Moonlight Sonata 3rd mvt (Marimba)", bee));
+musics.put("clairDeLune", new MusicInfo("Clair de Lune", deb));
+musics.put("hammerklavier", new MusicInfo("Hammerklavier", bee));
+musics.put("nocturne-9-2", new MusicInfo("Nocturne Op. 9 No. 2", cho));
+musics.put("laCampanella", new MusicInfo("La Campanella", liz));
+musics.put("symphony5", new MusicInfo("Symphony No. 5", bee));
+musics.put("preludeGMinor", new MusicInfo("Prelude in G Minor", rac));
+musics.put("raceTheSun", new MusicInfo("Race The Sun", sb));
 
 var currentMusField = null;
 try {
     currentMusField = Vars.control.sound.getClass().getDeclaredField("current");
     currentMusField.setAccessible(true);
 } catch (e) {
-    Log.err("Failed to reflect sound control music field: " + e);
+    Log.err("Had a brain aneurysm when trying to reflect sound control music field: " + e);
 }
 
 function getCurrentMusic() {
@@ -98,8 +94,7 @@ Events.run(Trigger.update, () => {
         
         if (musics.containsKey(filename)) {
             var info = musics.get(filename);
-            var iconDrawable = Icon.play;
-            Vars.ui.hudfrag.showToast(iconDrawable, "Now Playing: " + info.name + " - " + info.author);
+            Vars.ui.hudfrag.showToast(Icon.play, "Now Playing: " + info.name + " - " + info.author);
 
         }
     }
