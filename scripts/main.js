@@ -1,3 +1,6 @@
+// Heading ig
+const musics = new ObjectMap()
+
 // Muziks
 const darkMusic1 = Vars.tree.loadMusic("moonlightSonata3")
 const darkMusic2 = Vars.tree.loadMusic("moonlightSonata1")
@@ -13,6 +16,97 @@ const ambientMusic7 = Vars.tree.loadMusic("laCampanella")
 const ambientMusic8 = Vars.tree.loadMusic("symphony5")
 const ambientMusic9 = Vars.tree.loadMusic("preludeGMinor")
 const bossMusic = Vars.tree.loadMusic("raceTheSun")
+
+// Komposers
+const anu = "Anuke"
+const bee = "Ludwig v. Beethoven"
+const cho = "Frédéric Chopin"
+const deb = "Claude Debussy"
+const rac = "Sergei Rachmaninoff"
+const liz = "Franz Lizst"
+const sb = "Scott Buckley"
+const c418 = "C418"
+
+const def = "icon-mindustry"
+const none = "icon-none"
+
+// Informetion
+function MusicInfo(iconName, name, author) {
+    this.iconName = iconName;
+    this.name = name;
+    this.author = author;
+}
+
+// Your average Mindihtry musics
+musics.put("game1", new MusicInfo(def, "Game 1", anu));
+musics.put("game2", new MusicInfo(def, "Game 2", anu));
+musics.put("game3", new MusicInfo(def, "Game 3", anu));
+musics.put("game4", new MusicInfo(def, "Game 4", anu));
+musics.put("game5", new MusicInfo(def, "Game 5", anu));
+musics.put("game6", new MusicInfo(def, "Game 6", anu));
+musics.put("game7", new MusicInfo(def, "Game 7", anu));
+musics.put("game8", new MusicInfo(def, "Game 8", anu));
+musics.put("game9", new MusicInfo(def, "Game 9", anu));
+musics.put("fine", new MusicInfo(def, "Fine", anu));
+musics.put("boss1", new MusicInfo(def, "Boss 1", anu));
+musics.put("boss2", new MusicInfo(def, "Boss 2", anu));
+
+// Fire musics
+musics.put("moonlightSonata3", new MusicInfo(none, "Moonlight Sonata 3rd mvt", bee));
+musics.put("moonlightSonata1", new MusicInfo(none, "Moonlight Sonata 1st mvt", bee));
+musics.put("winterWind", new MusicInfo(none, "Winter Wind", cho));
+musics.put("torrent", new MusicInfo(none, "Torrent", cho));
+musics.put("dreitonPiano", new MusicInfo(none, "Dreiton Piano", c418));
+musics.put("moonlightSonata2", new MusicInfo(none, "Moonlight Sonata 2nd mvt", bee));
+musics.put("moonlightSonata3Marimba", new MusicInfo(none, "Moonlight Sonata 3rd mvt (Marimba)", bee));
+musics.put("clairDeLune", new MusicInfo(none, "Clair de Lune", deb));
+musics.put("hammerklavier", new MusicInfo(none, "Hammerklavier", bee));
+musics.put("nocturne-9-2", new MusicInfo(none, "Nocturne Op. 9 No. 2", cho));
+musics.put("laCampanella", new MusicInfo(none, "La Campanella", liz));
+musics.put("symphony5", new MusicInfo(none, "Symphony No. 5", bee));
+musics.put("preludeGMinor", new MusicInfo(none, "Prelude in G Minor", rac));
+musics.put("raceTheSun", new MusicInfo(none, "Race The Sun", sb));
+
+var currentMusField = null;
+try {
+    currentMusField = Vars.control.sound.getClass().getDeclaredField("current");
+    currentMusField.setAccessible(true);
+} catch (e) {
+    Log.err("Failed to reflect sound control music field: " + e);
+}
+
+function getCurrentMusic() {
+    if (!currentMusField) return null;
+    try {
+        return currentMusField.get(Vars.control.sound);
+    } catch (e) {
+        return null;
+    }
+}
+
+var lastMusic = null;
+
+Events.run(Trigger.update, () => {
+    if (!Vars.state.isGame()) return;
+
+    var current = getCurrentMusic();
+
+    if (current != null && current != lastMusic) {
+        lastMusic = current;
+
+        var filename = current.file.nameWithoutExtension();
+        
+        if (musics.containsKey(filename)) {
+            var info = musics.get(filename);
+            
+            var iconDrawable = Core.atlas.has(info.iconName) 
+                ? new TextureRegionDrawable(Core.atlas.find(info.iconName)) 
+                : Icon.audio;
+
+            Vars.ui.hudfrag.showToast(iconDrawable, "Now Playing: " + info.name + " - " + info.author);
+        }
+    }
+});
 
 Events.on(WorldLoadEvent, e => {
     Vars.state.rules.borderDarkness = false;
