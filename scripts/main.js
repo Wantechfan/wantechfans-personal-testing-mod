@@ -111,9 +111,9 @@ Events.run(Trigger.update, () => {
             toast.setPosition(Core.graphics.getWidth() / 2, Core.graphics.getHeight() - 100, Align.center);
             toast.color.a = 0;
             toast.actions(
-                Actions.fadeIn(0.5),
+                Actions.fadeIn(1.0),
                 Actions.delay(3.0),
-                Actions.fadeOut(0.5),
+                Actions.fadeOut(1.0),
                 Actions.remove()
             );
 
