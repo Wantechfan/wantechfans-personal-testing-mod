@@ -94,14 +94,29 @@ Events.run(Trigger.update, () => {
         
         if (musics.containsKey(filename)) {
             var info = musics.get(filename);
+            
+            var iconDrawable;
+            if (info.iconName && info.iconName !== none && Core.atlas.has(info.iconName)) {
+                iconDrawable = new TextureRegionDrawable(Core.atlas.find(info.iconName));
+            } else {
+                iconDrawable = Icon.play;
+            }
 
-            // Nah bro fuck showToast sfx
-            Vars.ui.hudfrag.showToast(table => {
-                table.background(Styles.black6);
-                table.margin(12);
-                table.image(Icon.play).size(32).padRight(8);
-                table.add("Now Playing: " + info.name + " - " + info.author).color(Pal.accent);
-            });
+            var toast = new Table(Styles.black6);
+            toast.margin(12);
+            toast.image(iconDrawable).size(32).padRight(8);
+            toast.add("Now Playing: " + info.name + " - " + info.author).color(Pal.accent);
+            toast.pack();
+
+            toast.setPosition(Core.graphics.getWidth() / 2, Core.graphics.getHeight() - 100, Align.center);
+            toast.actions(
+                Actions.fadeIn(0.3),
+                Actions.delay(3.0),
+                Actions.fadeOut(0.5),
+                Actions.remove()
+            );
+
+            Vars.ui.hudGroup.addChild(toast);
         }
     }
 });
