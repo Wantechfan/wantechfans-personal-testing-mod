@@ -98,12 +98,13 @@ Events.run(Trigger.update, () => {
         
         if (musics.containsKey(filename)) {
             var info = musics.get(filename);
-            
-            var iconDrawable = Core.atlas.has(info.iconName) 
+            // Check for custom atlas icon, otherwise fall back to Mindustry's built-in Icon
+            var iconDrawable = Core.atlas.has(info.iconName) && info.iconName !== "icon-none"
                 ? new TextureRegionDrawable(Core.atlas.find(info.iconName)) 
-                : Icon.audio;
+                : Icon.audio != null ? Icon.audio : Icon.play;
 
             Vars.ui.hudfrag.showToast(iconDrawable, "Now Playing: " + info.name + " - " + info.author);
+
         }
     }
 });
