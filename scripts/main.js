@@ -94,8 +94,14 @@ Events.run(Trigger.update, () => {
         
         if (musics.containsKey(filename)) {
             var info = musics.get(filename);
-            Vars.ui.hudfrag.showToast(Icon.play, "Now Playing: " + info.name + " - " + info.author);
 
+            // Nah bro fuck showToast sfx
+            Vars.ui.hudfrag.showToast(table => {
+                table.background(Styles.black6);
+                table.margin(12);
+                table.image(Icon.play).size(32).padRight(8);
+                table.add("Now Playing: " + info.name + " - " + info.author).color(Pal.accent);
+            });
         }
     }
 });
