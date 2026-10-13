@@ -1,4 +1,3 @@
-// Heading ig
 const musics = new ObjectMap()
 
 // Muziks
@@ -15,6 +14,7 @@ const ambientMusic6 = Vars.tree.loadMusic("nocturne-9-2")
 const ambientMusic7 = Vars.tree.loadMusic("laCampanella")
 const ambientMusic8 = Vars.tree.loadMusic("symphony5")
 const ambientMusic9 = Vars.tree.loadMusic("preludeGMinor")
+const ambientMusic10 = Vars.tree.loadMusic("pianoConcerto2-1")
 const bossMusic = Vars.tree.loadMusic("raceTheSun")
 
 // Komposers
@@ -61,6 +61,7 @@ musics.put("nocturne-9-2", new MusicInfo("Nocturne Op. 9 No. 2", cho));
 musics.put("laCampanella", new MusicInfo("La Campanella", liz));
 musics.put("symphony5", new MusicInfo("Symphony No. 5", bee));
 musics.put("preludeGMinor", new MusicInfo("Prelude in G Minor", rac));
+musics.put("pianoConcerto2-1", new MusicInfo("Piano Concerto no 2 1st mvt", rac));
 musics.put("raceTheSun", new MusicInfo("Race The Sun", sb));
 
 var currentMusField = null;
@@ -105,7 +106,7 @@ Events.run(Trigger.update, () => {
             var toast = new Table(Styles.black6);
             toast.margin(12);
             toast.image(iconDrawable).size(32).padRight(8);
-            toast.add("Now Playing: " + info.name + " - " + info.author).color(Pal.accent);
+            toast.add("Now Playing:\n" + info.name + " - " + info.author).color(Pal.accent);
             toast.pack();
 
             toast.setPosition(Core.graphics.getWidth() / 2, Core.graphics.getHeight() - 100, Align.center);
