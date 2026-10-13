@@ -104,7 +104,7 @@ Events.run(Trigger.update, () => {
             }
 
             var toast = new Table(Styles.black6);
-            toast.margin(12);
+            toast.margin(11);
             toast.image(iconDrawable).size(32).padRight(8);
             toast.add("Now Playing:\n" + info.name + " - " + info.author).color(Pal.accent);
             toast.pack();
