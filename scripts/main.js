@@ -150,9 +150,8 @@ Events.on(ClientLoadEvent, () => {
 
     // Music setting
     if (Core.settings.getBool("epicMusics", false)) {
-        Vars.control.sound.ambientMusic = seq([]);
-        Vars.control.sound.darkMusic = seq([]);
-        Vars.control.sound.bossMusic = seq([]);
+        soundManager.ambientMusic = seq([]);
+        soundManager.darkMusic = seq([]);
         soundManager.darkMusic.addAll(darkMusic1, darkMusic2, darkMusic3, darkMusic4);
         soundManager.ambientMusic.addAll(ambientMusic1, ambientMusic2, ambientMusic3, ambientMusic4, ambientMusic5, ambientMusic6, ambientMusic7, ambientMusic8, ambientMusic9);
         soundManager.bossMusic.add(bossMusic);
