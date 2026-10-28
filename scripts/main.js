@@ -15,6 +15,7 @@ const ambientMusic7 = Vars.tree.loadMusic("laCampanella")
 const ambientMusic8 = Vars.tree.loadMusic("symphony5")
 const ambientMusic9 = Vars.tree.loadMusic("preludeGMinor")
 const ambientMusic10 = Vars.tree.loadMusic("pianoConcerto2-1")
+const ambientMusic11 = Vars.tree.loadMusic("pianoConcerto2-2")
 const bossMusic = Vars.tree.loadMusic("raceTheSun")
 
 // Komposers
@@ -62,6 +63,7 @@ musics.put("laCampanella", new MusicInfo("La Campanella", liz));
 musics.put("symphony5", new MusicInfo("Symphony No. 5", bee));
 musics.put("preludeGMinor", new MusicInfo("Prelude in G Minor", rac));
 musics.put("pianoConcerto2-1", new MusicInfo("Piano Concerto no 2 1st mvt", rac));
+musics.put("pianoConcerto2-2", new MusicInfo("Piano Concerto no 2 2nd mvt", rac));
 musics.put("raceTheSun", new MusicInfo("Race The Sun", sb));
 
 var currentMusField = null;
